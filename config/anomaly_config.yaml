@@ -1,0 +1,412 @@
+# ============================================================
+# DD Pipeline — Anomaly Detection Config
+# 44 checks across 9 categories
+# Edit Keep/Change/Remove column for CEO review
+# ============================================================
+
+checks:
+
+  # ── MISSING SECTIONS (MS) ─────────────────────────────────
+  - id: MS_001
+    category: MS
+    severity: HIGH
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a clearly identified Problem slide?"
+    investor_question: "Can you walk us through the core problem you are solving?"
+    ic_memo_flag: true
+
+  - id: MS_002
+    category: MS
+    severity: HIGH
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Solution slide?"
+    investor_question: "How does your product or service solve the problem you identified?"
+    ic_memo_flag: true
+
+  - id: MS_003
+    category: MS
+    severity: HIGH
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Team slide?"
+    investor_question: "Who are the founders and key team members, and what are their backgrounds?"
+    ic_memo_flag: true
+
+  - id: MS_004
+    category: MS
+    severity: HIGH
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Financials slide?"
+    investor_question: "Can you share your current financials and projections?"
+    ic_memo_flag: true
+
+  - id: MS_005
+    category: MS
+    severity: MEDIUM
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Traction slide?"
+    investor_question: "What traction have you achieved to date — customers, revenue, growth?"
+    ic_memo_flag: false
+
+  - id: MS_006
+    category: MS
+    severity: MEDIUM
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Market slide?"
+    investor_question: "What is the size of the market you are targeting?"
+    ic_memo_flag: false
+
+  - id: MS_007
+    category: MS
+    severity: MEDIUM
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Cap Table or Funding slide?"
+    investor_question: "What does the current cap table look like and what is the funding history?"
+    ic_memo_flag: false
+
+  - id: MS_008
+    category: MS
+    severity: MEDIUM
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck include a Competition or Competitive Landscape slide?"
+    investor_question: "Who are your main competitors and how do you differentiate?"
+    ic_memo_flag: false
+
+  - id: MS_009
+    category: MS
+    severity: HIGH
+    method: deterministic
+    section_scope: [ANY]
+    question: "Does the deck have at least 8 slides?"
+    investor_question: "The deck appears unusually short. Is this a summary version?"
+    ic_memo_flag: false
+
+  # ── MARKET & PROBLEM (MKT) ────────────────────────────────
+  - id: MKT_001
+    category: MKT
+    severity: HIGH
+    method: llm
+    section_scope: [MARKET]
+    question: "Does the deck provide a source, citation, or methodology for its TAM/SAM/SOM figures? A named research firm, report title, or calculation methodology counts. Vague phrases like 'industry data' do not count."
+    investor_question: "Can you provide the source or methodology behind your TAM/SAM/SOM figures?"
+    ic_memo_flag: true
+
+  - id: MKT_002
+    category: MKT
+    severity: HIGH
+    method: llm
+    section_scope: [PROBLEM, MARKET]
+    question: "Does the deck provide evidence of customer discovery or validated demand — such as interviews, surveys, letters of intent, waitlists, or pilot results?"
+    investor_question: "What customer discovery have you done? Can you share evidence of validated demand?"
+    ic_memo_flag: true
+
+  - id: MKT_003
+    category: MKT
+    severity: MEDIUM
+    method: llm
+    section_scope: [MARKET]
+    question: "Does the deck clearly define the target customer segment with specific characteristics — not just broad demographics?"
+    investor_question: "How specifically have you defined your target customer? What are their key characteristics?"
+    ic_memo_flag: false
+
+  - id: MKT_004
+    category: MKT
+    severity: MEDIUM
+    method: llm
+    section_scope: [MARKET, PROBLEM]
+    question: "Does the deck explain why this problem is urgent or why now is the right time to solve it?"
+    investor_question: "Why is now the right time for this solution? What has changed in the market?"
+    ic_memo_flag: false
+
+  - id: MKT_005
+    category: MKT
+    severity: LOW
+    method: llm
+    section_scope: [MARKET]
+    question: "Does the deck address any regulatory or compliance factors relevant to the market?"
+    investor_question: "Are there regulatory or compliance considerations in your target market?"
+    ic_memo_flag: false
+
+  # ── TECHNOLOGY & PRODUCT (TECH) ───────────────────────────
+  - id: TECH_001
+    category: TECH
+    severity: HIGH
+    method: llm
+    section_scope: [TECHNOLOGY, SOLUTION]
+    question: "Does the deck claim AI, ML, or proprietary technology? If so, does it provide any technical substance — architecture, methodology, or differentiation — beyond marketing language?"
+    investor_question: "Can you describe the technical architecture or methodology behind your AI/ML claims?"
+    ic_memo_flag: true
+
+  - id: TECH_002
+    category: TECH
+    severity: HIGH
+    method: llm
+    section_scope: [TECHNOLOGY, SOLUTION]
+    question: "Does the deck explain any defensible moat — IP, patents, proprietary data, network effects, or switching costs?"
+    investor_question: "What makes your technology defensible? Do you have any IP, patents, or proprietary data?"
+    ic_memo_flag: true
+
+  - id: TECH_003
+    category: TECH
+    severity: HIGH
+    method: llm
+    section_scope: [TECHNOLOGY, SOLUTION]
+    question: "Does the deck describe the product's current development stage — idea, prototype, beta, live, or scaling?"
+    investor_question: "What is the current development stage of your product?"
+    ic_memo_flag: true
+
+  - id: TECH_004
+    category: TECH
+    severity: MEDIUM
+    method: llm
+    section_scope: [TECHNOLOGY, SOLUTION]
+    question: "Does the deck describe a clear and logical customer journey or product workflow?"
+    investor_question: "Can you walk us through the end-to-end customer journey with your product?"
+    ic_memo_flag: false
+
+  - id: TECH_005
+    category: TECH
+    severity: MEDIUM
+    method: llm
+    section_scope: [TECHNOLOGY]
+    question: "Does the deck mention any third-party technology dependencies that could represent a risk — cloud providers, APIs, open-source components?"
+    investor_question: "What third-party technology dependencies does your product rely on?"
+    ic_memo_flag: false
+
+  - id: TECH_006
+    category: TECH
+    severity: LOW
+    method: llm
+    section_scope: [TECHNOLOGY, SOLUTION]
+    question: "Does the deck address data privacy, security, or compliance relevant to the product?"
+    investor_question: "How does your product handle data privacy and security?"
+    ic_memo_flag: false
+
+  # ── FINANCIALS (FIN) ──────────────────────────────────────
+  - id: FIN_001
+    category: FIN
+    severity: HIGH
+    method: deterministic
+    section_scope: [FINANCIALS]
+    question: "Does the deck contain any specific revenue figures, ARR, MRR, or financial projections?"
+    investor_question: "Can you share your current revenue figures and financial projections?"
+    ic_memo_flag: true
+
+  - id: FIN_002
+    category: FIN
+    severity: HIGH
+    method: llm
+    section_scope: [FINANCIALS]
+    question: "Do the financial projections include stated assumptions — growth rate basis, customer acquisition assumptions, or cost structure logic?"
+    investor_question: "What are the key assumptions behind your financial projections?"
+    ic_memo_flag: true
+
+  - id: FIN_003
+    category: FIN
+    severity: HIGH
+    method: llm
+    section_scope: [FINANCIALS]
+    question: "Does the deck state the current burn rate and runway in months?"
+    investor_question: "What is your current monthly burn rate and how many months of runway do you have?"
+    ic_memo_flag: true
+
+  - id: FIN_004
+    category: FIN
+    severity: HIGH
+    method: llm
+    section_scope: [FINANCIALS, TRACTION]
+    question: "Does the deck provide unit economics — CAC, LTV, LTV:CAC ratio, or payback period?"
+    investor_question: "What are your unit economics — CAC, LTV, and payback period?"
+    ic_memo_flag: true
+
+  - id: FIN_005
+    category: FIN
+    severity: MEDIUM
+    method: llm
+    section_scope: [FINANCIALS]
+    question: "Are there any numbers that appear inconsistent across different slides — for example revenue figures that don't match between summary and detail slides?"
+    investor_question: "We noticed some figures that appear inconsistent across slides. Can you clarify?"
+    ic_memo_flag: false
+
+  - id: FIN_006
+    category: FIN
+    severity: MEDIUM
+    method: llm
+    section_scope: [FINANCIALS]
+    question: "Does the deck explain what the investment will be used for — with a specific breakdown of use of funds?"
+    investor_question: "Can you provide a breakdown of how you plan to use the investment proceeds?"
+    ic_memo_flag: false
+
+  - id: FIN_007
+    category: FIN
+    severity: LOW
+    method: llm
+    section_scope: [FINANCIALS]
+    question: "Does the deck mention the path to profitability or breakeven point?"
+    investor_question: "When do you expect to reach profitability or breakeven, and what are the key milestones?"
+    ic_memo_flag: false
+
+  # ── GO-TO-MARKET & TRACTION (GTM) ────────────────────────
+  - id: GTM_001
+    category: GTM
+    severity: HIGH
+    method: llm
+    section_scope: [TRACTION]
+    question: "Does the deck provide evidence of paying customers — not just users, pilots, or sign-ups?"
+    investor_question: "How many paying customers do you have? What is your current MRR or ARR?"
+    ic_memo_flag: true
+
+  - id: GTM_002
+    category: GTM
+    severity: HIGH
+    method: llm
+    section_scope: [TRACTION, SOLUTION]
+    question: "Does the deck describe a specific, credible go-to-market strategy — not just 'sales and marketing'?"
+    investor_question: "Can you walk us through your go-to-market strategy in detail?"
+    ic_memo_flag: true
+
+  - id: GTM_003
+    category: GTM
+    severity: HIGH
+    method: llm
+    section_scope: [TRACTION]
+    question: "Does the deck show month-over-month or year-over-year growth with specific numbers?"
+    investor_question: "Can you show your growth trajectory with specific monthly or annual figures?"
+    ic_memo_flag: true
+
+  - id: GTM_004
+    category: GTM
+    severity: MEDIUM
+    method: llm
+    section_scope: [TRACTION, SOLUTION]
+    question: "Does the deck mention customer retention, churn rate, or NPS?"
+    investor_question: "What is your customer retention rate and churn? Do you track NPS?"
+    ic_memo_flag: false
+
+  - id: GTM_005
+    category: GTM
+    severity: MEDIUM
+    method: llm
+    section_scope: [TRACTION]
+    question: "Does the deck mention any named customer logos, case studies, or testimonials?"
+    investor_question: "Can you share named customer references or case studies?"
+    ic_memo_flag: false
+
+  # ── COMPETITIVE LANDSCAPE (COMP) ─────────────────────────
+  - id: COMP_001
+    category: COMP
+    severity: HIGH
+    method: llm
+    section_scope: [COMPETITION]
+    question: "Does the deck name specific competitors — not just generic categories like 'traditional players' or 'legacy solutions'?"
+    investor_question: "Who are your specific named competitors and how do you compare directly?"
+    ic_memo_flag: true
+
+  - id: COMP_002
+    category: COMP
+    severity: HIGH
+    method: llm
+    section_scope: [COMPETITION]
+    question: "Does the competitive analysis appear superficial — for example a magic quadrant where the company leads in all dimensions without explanation?"
+    investor_question: "Your competitive positioning appears one-sided. Can you provide an objective comparison?"
+    ic_memo_flag: true
+
+  - id: COMP_003
+    category: COMP
+    severity: MEDIUM
+    method: llm
+    section_scope: [COMPETITION]
+    question: "Does the deck address the threat of large incumbents or well-funded competitors entering the space?"
+    investor_question: "How would you respond if a well-funded incumbent decided to compete directly with you?"
+    ic_memo_flag: false
+
+  # ── TEAM (TEAM) ───────────────────────────────────────────
+  - id: TEAM_001
+    category: TEAM
+    severity: HIGH
+    method: llm
+    section_scope: [TEAM]
+    question: "Does the team have a gap in a critical function — for example no technical co-founder for a tech product, or no sales lead for a B2B company?"
+    investor_question: "We noticed a potential gap in the team. How are you addressing the need for [role]?"
+    ic_memo_flag: true
+
+  - id: TEAM_002
+    category: TEAM
+    severity: MEDIUM
+    method: llm
+    section_scope: [TEAM]
+    question: "Does the deck provide relevant prior experience for each founder — domain expertise, prior startups, or industry background?"
+    investor_question: "Can you elaborate on the founders' relevant prior experience for this venture?"
+    ic_memo_flag: false
+
+  - id: TEAM_003
+    category: TEAM
+    severity: MEDIUM
+    method: llm
+    section_scope: [TEAM]
+    question: "Does the deck mention any advisors, board members, or notable backers with relevant expertise?"
+    investor_question: "Who are your advisors or board members? What relevant expertise do they bring?"
+    ic_memo_flag: false
+
+  - id: TEAM_004
+    category: TEAM
+    severity: LOW
+    method: llm
+    section_scope: [TEAM]
+    question: "Does the deck mention founder vesting schedules or equity arrangements?"
+    investor_question: "What are the founder vesting schedules and equity arrangements?"
+    ic_memo_flag: false
+
+  # ── LEGAL & REGULATORY (LEGAL) ────────────────────────────
+  - id: LEGAL_001
+    category: LEGAL
+    severity: HIGH
+    method: llm
+    section_scope: [ANY]
+    question: "Does the deck operate in a regulated industry — fintech, healthtech, edtech, legaltech — without mentioning relevant licences, compliance, or regulatory approvals?"
+    investor_question: "What licences or regulatory approvals do you have or are pursuing?"
+    ic_memo_flag: true
+
+  - id: LEGAL_002
+    category: LEGAL
+    severity: MEDIUM
+    method: llm
+    section_scope: [ANY]
+    question: "Does the deck mention any pending litigation, IP disputes, or legal encumbrances?"
+    investor_question: "Are there any pending legal issues, IP disputes, or encumbrances we should be aware of?"
+    ic_memo_flag: false
+
+  # ── REPORT QUALITY / IC MEMO (IC) ────────────────────────
+  - id: IC_001
+    category: IC
+    severity: HIGH
+    method: llm
+    section_scope: [ANY]
+    question: "Are there any numerical inconsistencies across slides — for example revenue figures that contradict each other, or growth rates that do not match the underlying numbers?"
+    investor_question: "We identified potential numerical inconsistencies. Can you clarify the correct figures?"
+    ic_memo_flag: true
+
+  - id: IC_002
+    category: IC
+    severity: MEDIUM
+    method: llm
+    section_scope: [ANY]
+    question: "Does the deck make any extraordinary claims — market leadership, unique technology, or exceptional growth — without supporting evidence?"
+    investor_question: "Several claims appear unsubstantiated. Can you provide evidence for each?"
+    ic_memo_flag: false
+
+  - id: IC_003
+    category: IC
+    severity: LOW
+    method: llm
+    section_scope: [ANY]
+    question: "Is the deck professionally presented — consistent formatting, no spelling errors, no placeholder text?"
+    investor_question: "The deck has some presentation issues. Please review before the next investor meeting."
+    ic_memo_flag: false
