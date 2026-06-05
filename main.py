@@ -10,6 +10,7 @@ Usage:
 import argparse
 import sys
 import os
+import json
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(__file__))
@@ -54,6 +55,48 @@ Examples:
         run_llm_pass=not args.no_llm,
         llm_provider=args.provider,
     )
+ 
+
+    # Print full findings as JSON
+    output = []
+    for f in result.all_findings:
+        output.append({
+            "id": f.anomaly_id,
+            "category": f.category,
+            "severity": f.severity,
+            "status": f.status,
+            "label": f.label,
+            "evidence": f.evidence,
+            "slide_reference": f.slide_reference,
+            "ic_memo_flag": f.ic_memo_flag,
+            "generated_question": f.generated_question,
+            "pass": f.check_pass,
+        })
+
+    with open("pipeline_output.json", "w", encoding="utf-8") as f:
+        json.dump(output, f, indent=2, ensure_ascii=False)
+
+    print("\n✅ Full JSON output saved to pipeline_output.json")
+    # Save slide data as JSON
+    slides_output = []
+    for slide in result.deck.slides:
+        slides_output.append({
+            "slide_number": slide.slide_number,
+            "detected_section": slide.detected_section,
+            "raw_text": slide.raw_text,
+            "cleaned_text": slide.cleaned_text,
+            "has_charts": slide.has_charts,
+            "image_count": slide.image_count,
+            "tables": [
+                {"headers": t.headers, "rows": t.rows}
+                for t in slide.tables
+            ],
+        })
+
+    with open("slides_output.json", "w", encoding="utf-8") as sf:
+        json.dump(slides_output, sf, indent=2, ensure_ascii=False)
+
+    print("✅ Slide data saved to slides_output.json")
 
     # Report generation (Layer 4+5) — coming in next build phase
     print("\n📋 Pipeline complete. Report generation module coming next.")

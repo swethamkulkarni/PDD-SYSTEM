@@ -862,7 +862,7 @@ def setup_page_footer(section) -> None:
         for r in p.runs:
             r.text = ""
 
-    def _add_footer_para(space_before=0, space_after=2):
+    def _add_footer_para(space_before=1, space_after=2):
         p = footer.add_paragraph()
         p.paragraph_format.space_before = Pt(space_before)
         p.paragraph_format.space_after  = Pt(space_after)
