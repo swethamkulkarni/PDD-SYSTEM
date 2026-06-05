@@ -62,6 +62,63 @@ def _load_adapter():
         "Ensure the llm/ directory is on your Python path."
     )
 
+# ADDED: 24/05
+def _strip_gap_sections(text: str) -> str:
+    """
+    Remove any gap/concerns blocks the LLM generates despite system prompt
+    instructions. Strips lines and paragraphs containing gap-related markers.
+    """
+    _GAP_MARKERS = [
+        "gaps / concerns:",
+        "gaps/concerns:",
+        "gaps:",
+        "concerns:",
+        "the deck does not address",
+        "the deck does not include",
+        "the deck does not provide",
+        "no data available",
+        "information gap:",
+        "suggested follow-up:",
+        "follow-up question:",
+        "not addressed in the deck",
+        "absent from the deck",
+        "not present in the deck",
+        "not explicitly mentioned",
+        "not explicitly stated",
+        "not disclosed in the deck",
+    ]
+
+    lines = text.splitlines()
+    cleaned = []
+    skip_block = False
+
+    for line in lines:
+        lower = line.strip().lower()
+
+        # Detect a gap sub-header — skip it and the lines that follow
+        if any(lower.startswith(m) for m in _GAP_MARKERS[:6]):
+            skip_block = True
+            continue
+
+        # A blank line ends the skip block
+        if skip_block and line.strip() == "":
+            skip_block = False
+            continue
+
+        if skip_block:
+            continue
+
+        # Skip individual lines containing gap language anywhere
+        if any(m in lower for m in _GAP_MARKERS[6:]):
+            continue
+
+        cleaned.append(line)
+
+    # Remove trailing blank lines
+    while cleaned and not cleaned[-1].strip():
+        cleaned.pop()
+
+    return "\n".join(cleaned)
 
 # ---------------------------------------------------------------------------
 # Shared prompt building utilities
@@ -83,6 +140,50 @@ def _is_boilerplate(text: str) -> bool:
     hits = sum(1 for s in _BOILERPLATE_SIGNALS if s in lower)
     return hits >= 2
 
+# Edited: 04/06/26
+def extract_company_name_llm(result, llm) -> str:
+    """
+    Use a single cheap LLM call to extract the company name from cover/first slides.
+    Falls back to programmatic extraction if LLM is unavailable or returns nothing.
+    """
+    # Collect cover slide text only — cheap context
+    cover_text = ""
+    try:
+        for slide in result.deck.slides[:4]:   # only first 4 slides
+            txt = (getattr(slide, "cleaned_text", "")
+                   or getattr(slide, "raw_text", "") or "").strip()
+            if txt and not _is_boilerplate(txt):
+                cover_text += txt + "\n"
+            if len(cover_text) > 800:           # cap context size
+                break
+    except AttributeError:
+        pass
+
+    if not cover_text.strip():
+        return ""
+
+    try:
+        response = llm.complete(
+            system_prompt=(
+                "You extract company names from pitch deck text. "
+                "Reply with ONLY the company name — nothing else. "
+                "No explanation, no punctuation, no quotes."
+            ),
+            user_prompt=(
+                f"What is the name of the company described in this pitch deck text?\n\n"
+                f"{cover_text[:800]}"
+            ),
+            temperature=0.0,
+            max_tokens=15,        # company name is never more than 15 tokens
+        )
+        name = response.text.strip().strip('"\'')
+        # Sanity check — reject if it looks like a sentence
+        if name and len(name.split()) <= 6 and len(name) <= 60:
+            return name
+    except Exception as e:
+        print(f"[extract_company_name_llm] LLM call failed: {e}")
+
+    return ""
 
 def _format_table(table) -> str:
     """
@@ -145,56 +246,63 @@ def _findings_bullets(findings_summary: str) -> str:
 
 # ---------------------------------------------------------------------------
 # Per-section system prompts
+# GAPS/concerns removed: 24/05
 # ---------------------------------------------------------------------------
 
+# Edited 2024-06-20: refined system prompts for sharper tone and clearer grounding rules.
 _SYSTEM_A = """\
-You are a senior associate at a venture capital firm writing a formal due diligence report.
-Your tone is professional, factual, and analytical — similar to a McKinsey or Goldman Sachs
-style memo. Write in clear paragraphs (no markdown, no bullet points in your output).
-Synthesise the provided slide content into coherent prose for the requested section.
-If key information is missing, note the gap explicitly rather than fabricating details.
+You are a senior associate at a venture capital firm writing a preliminary due diligence report
+for internal investment review. Your role is to INTERPRET and ANALYSE — not summarise the deck.
+Add investor-grade perspective: assess credibility, flag what needs verification, and draw
+inferences that a first-time reader of the deck would miss.
 
-GROUNDING RULES — these are absolute and override all other instructions:
-1. ONLY state facts that are explicitly present in the provided slide content.
-   Do not infer, extrapolate, or assume anything beyond what is written.
-2. NEVER attribute a specific benefit or relationship to the company unless the
-   slides explicitly state it. If a slide says X is available in Qatar generally,
-   do NOT say the company will specifically receive X.
-3. When reading tables, read each row independently. Do not apply a value (e.g.
-   an IRR figure) labelled for one funding stage to a different stage or the
-   project as a whole.
-4. If information is genuinely absent from the slides, say "the deck does not
-   address X" and move on. Do NOT invent what that information might be.
-5. Only flag a gap or concern if you can point to specific slide text that is
-   missing or contradictory. Do not invent concerns about topics the slides
-   simply did not cover.
+OUTPUT FORMAT — follow this exactly:
+- Begin with one SHORT analytical paragraph (2–4 sentences) giving your assessment of the
+  section — not a description of what the deck says, but your read of it as an investor.
+- Then provide 3–6 bullet points (start each with "• ") giving specific evidence, observations,
+  or flagged gaps. Each bullet is one concise sentence. Mix confirmed facts with your assessment
+  of their credibility where relevant.
+- If there are notable gaps or concerns, add a short "Gaps / Concerns:" sub-header followed
+  by 1–3 bullets naming exactly what is missing or unverified.
+- Do NOT write long paragraphs. Keep the whole section tight and scannable.
+- Do NOT use markdown headers, bold, or any other formatting — plain text only.
+- Do NOT repeat the section heading in your response.
+- Do NOT begin with phrases like "The deck states" or "The pitch deck covers" — write as
+  if you are briefing a partner who has not read the deck.
 
-Keep each section to 2–4 paragraphs unless the content warrants more.
-Do not repeat the section heading in your response."""
+GROUNDING RULES — absolute, override everything else:
+1. Only state facts explicitly present in the provided slide content.
+2. Never attribute a specific benefit to the company unless the slides state it directly.
+3. Read table rows independently — never apply a figure from one stage to another.
+4. If information is absent, say "the deck does not address X" — do not invent it.
+5. Do NOT include a Gaps section, "Gaps / Concerns:" sub-header, or any "the deck does not address" statements.
+6. Do NOT flag missing information or absent slides — write only about what is present.
+7. Distinguish between verified facts and unverified claims using phrases like
+   "the company reports", "claimed by management", "as yet unaudited"."""
 
 _SYSTEM_B = """\
 You are a skeptical senior VC partner writing a confidential IC memo for your investment committee.
-Your tone is direct, critical, and unimpressed by hype — you have seen hundreds of decks.
-Write in tight, opinionated paragraphs. Flag missing evidence, unverified claims, and structural
-risks proactively. Use phrases like "the company claims", "management asserts", "unverified by
-independent sources". Do not use bullet points or markdown in your output.
+You have seen hundreds of decks. You are direct, critical, and allergic to unsubstantiated claims.
 
-GROUNDING RULES — these are absolute and override all other instructions:
-1. ONLY state facts that are explicitly present in the provided slide content.
-   Do not infer, extrapolate, or assume anything beyond what is written.
-2. NEVER attribute a specific benefit to the company unless the slides say so
-   explicitly. If a slide says X is available in Qatar, say "Qatar offers X to
-   businesses in the free zone" — not "the company will receive X."
-3. When reading tables, read each row independently. Do not apply a figure (e.g.
-   Seed IRR) labelled for one stage to a different stage or the project overall.
-4. You may flag missing evidence — but ONLY if you can identify specific slide
-   text that is absent or contradictory. Do not invent concerns about topics the
-   slides simply did not discuss.
-5. Use phrases like "the company claims", "management asserts", "the deck states"
-   to attribute claims to their source rather than presenting them as verified.
+OUTPUT FORMAT — follow this exactly:
+- Begin with one SHORT, opinionated paragraph (2–4 sentences) giving your overall read.
+  Use phrases like "the company claims", "management asserts", "the deck states".
+- Then provide 3–6 bullet points (start each with "• ") covering specific evidence,
+  unverified claims, red flags, or structural risks. One sentence per bullet.
+- If there are critical risks, add a "Red Flags:" sub-header followed by 1–3 bullets.
+  Only include if there are genuine red flags from the slide content.
+- Keep the whole section tight. No long paragraphs. Scannable for busy partners.
+- Do NOT use markdown headers, bold, or any other formatting — plain text only.
+- Do NOT repeat the section heading in your response.
 
-Keep each section to 2–3 paragraphs. Do not repeat the section heading in your response."""
-
+GROUNDING RULES — absolute, override everything else:
+1. Only state facts explicitly present in the provided slide content.
+2. Never attribute a specific benefit to the company unless the slides state it directly.
+3. Read table rows independently — never apply a figure from one stage to another.
+4. Do NOT include gap notes, "Red Flags:" sub-headers for missing information, or
+   "the deck does not address" statements — write only about what is present.
+5. Attribute all claims: "the company claims", "the deck states", "management asserts"."""
+#  Edit: 24/05 - changed for gaps/concerns rules 4 and 5
 
 # ---------------------------------------------------------------------------
 # Section-specific user prompt templates
@@ -202,182 +310,331 @@ Keep each section to 2–3 paragraphs. Do not repeat the section heading in your
 
 _USER_PROMPTS: dict[str, str] = {
 
+    # ------------------------------------------------------------------
+    # Framework A — DD Report sections
+    # ------------------------------------------------------------------
+
     "product_description": """\
-Write the Product Description section. Cover: what the company does, the problem it addresses,
-its core value proposition, and target customers. Use only the slide content provided.
+Write the Product Description section for a preliminary due diligence report.
+
+Cover ALL of the following — if any are absent from the slides, say so explicitly:
+1. What the company does and the specific problem it solves (not generic market pain — the precise pain point)
+2. Why existing solutions are inadequate (the "why now" / "why this" framing)
+3. The company's specific solution and core value proposition — what makes it different
+4. Target customer segments and their profile
+5. Stage of the product (concept / MVP / live / scaling)
+
+Format: one short summary paragraph, then bullet points for each of points 1–5 above.
 
 Slide content:
 {context}
 {findings}""",
 
     "technology_solution": """\
-Write the Technology Solution section. Cover: what the technology does, how it works at a high
-level, key innovations, and any claims about competitive advantage. Note any gaps or unverified
-technical claims.
+Write the Technology Solution section for a preliminary due diligence report.
+
+Cover ALL of the following — flag any that are absent:
+1. How the technology works — specific mechanism, not just category labels
+2. Key technical innovations claimed and the evidence supporting them
+3. AI / ML components: what models, training data, outputs (if applicable)
+4. Scalability: can it handle 10x or 100x load — what does the deck say?
+5. Technical risks or limitations acknowledged in the deck
+6. IP position: patents, trade secrets, proprietary data — what is stated vs. implied
+
+The technology section must go beyond restating the product pitch. Identify where the deck
+is vague or makes unverified technical claims. Note gaps explicitly.
 
 Slide content:
 {context}
 {findings}""",
 
     "business_model": """\
-Write the Business Model section. Cover: how the company makes money, revenue streams, pricing
-model (if mentioned), key partnerships, and customer acquisition approach.
+Write the Business Model section for a preliminary due diligence report.
+
+Cover ALL of the following — flag any that are absent or unclear:
+1. Revenue streams — how the company charges (SaaS, transaction fee, licence, etc.)
+2. Pricing model — specific price points or tiers if mentioned; if not, say so
+3. Unit economics: CAC, LTV, gross margin — stated or implied
+4. Key commercial relationships: customers, partners, distribution channels
+5. Revenue trajectory: current ARR/MRR, growth rate, projections and their basis
+6. Monetisation gaps: what is missing that a full DD would require
+
+The business model section should assess commercial viability, not just describe it.
+Note where the model is early-stage, unproven, or dependent on assumptions not validated.
 
 Slide content:
 {context}
 {findings}""",
 
     "technology_overview": """\
-Write the Technology Overview section covering technical architecture, IP, and defensibility.
-Be specific about what is known from the deck and what is absent or unverified.
+Write the Technology Overview — Technical Architecture sub-section.
+
+Focus on:
+1. System architecture at a conceptual level (what components, how they connect)
+2. Data infrastructure: sources, pipelines, storage — what is described
+3. AI/ML specifics if applicable: approach, training, inference, accuracy claims
+4. Integration points with third-party systems or APIs
+5. Security, reliability, and compliance considerations mentioned
+
+Be precise about what is explicitly described vs. what is implied or absent.
+A vague "proprietary AI platform" claim is not architecture — call it out.
 
 Slide content:
 {context}
 {findings}""",
 
     "team": """\
-Write the Team section. Summarise each key person's background, relevant experience, and role.
-Note if team information is sparse or if key roles appear unfilled.
+Write the Team section for a preliminary due diligence report.
+
+Cover ALL of the following:
+1. Each named team member: role, relevant prior experience, notable achievements
+2. Domain expertise: is the team qualified for the specific problem they are solving?
+3. Execution track record: have they built and scaled companies before?
+4. Team completeness: are there obvious gaps (e.g. missing technical lead, sales lead)?
+5. Advisors or board members if mentioned — note if advisory board is used to compensate for team gaps
+
+Be direct about thin team profiles. A single founder with generalist experience is a risk — say so.
+Note if the deck over-indexes on logos (Google, Goldman etc.) without specific role context.
 
 Slide content:
 {context}
 {findings}""",
 
     "cap_table": """\
-Write the Cap Table and Funding section. Cover: current ownership structure, funding history,
-amount being raised, valuation (if stated), and use of proceeds. Flag any unusual terms or gaps.
+Write the Cap Table and Funding section for a preliminary due diligence report.
 
-IMPORTANT: If the slides include a table of IRR or valuation figures across multiple funding
-stages, report each stage's figure separately with its explicit stage label. Do NOT apply a
-figure from one stage (e.g. Seed >100x IRR) to the project as a whole or to later stages.
+Cover ALL of the following — flag any that are absent:
+1. Current ownership structure: founders, employees, existing investors — percentages if stated
+2. Funding history: rounds raised, amounts, investors, dates
+3. Current raise: amount, instrument (equity / SAFE / convertible), valuation or cap
+4. Use of proceeds: how the raised capital will be deployed (specific allocations if given)
+5. Runway: how long the current/proposed raise covers at stated burn rate
+6. Red flags: unusual terms, high dilution, missing information on ownership
+
+IMPORTANT: If the slides include IRR or return figures across multiple funding stages,
+report each stage's figure with its explicit label. Never apply one stage's figure to another.
+If cap table details are absent, say so directly — this is a material gap.
 
 Slide content:
 {context}
 {findings}""",
 
     "traction": """\
-Write the Traction section. Cover: key metrics (ARR, MRR, customers, growth rate), milestones
-achieved, and evidence of product-market fit. Be explicit about what is verified vs. claimed.
+Write the Traction section for a preliminary due diligence report.
+
+Cover ALL of the following — flag any that are absent or unsubstantiated:
+1. Revenue metrics: current ARR/MRR, growth rate (MoM or YoY), trend
+2. Customer metrics: number of customers, customer names (if given), retention / churn
+3. Pipeline: qualified leads, pilots, LOIs — distinguish signed from verbal commitments
+4. Milestones achieved: product launches, partnerships, regulatory approvals
+5. Evidence quality: are metrics audited, self-reported, or projection-only?
+
+Traction is the most verifiable section — be explicit about what is concrete vs. claimed.
 
 Slide content:
 {context}
 {findings}""",
 
     "market_opportunity": """\
-Write the Market Opportunity section. Cover: TAM/SAM/SOM, market dynamics, demand drivers,
-and the company's positioning within the market.
+Write the Market Opportunity section for a preliminary due diligence report.
 
-IMPORTANT: When mentioning government bodies, funds, or programmes (e.g. QIA, QFZ, NDS3),
-only state what the slides say they offer to businesses in general. Do NOT state that the
-company will specifically receive those benefits unless the slides say so explicitly.
-Note any unsourced market size claims.
+Cover ALL of the following:
+1. Total Addressable Market (TAM) — size and source; note if unsourced
+2. Serviceable Addressable Market (SAM) and Serviceable Obtainable Market (SOM) if stated
+3. Market dynamics: growth drivers, tailwinds, structural shifts
+4. Demand evidence: regulatory mandates, corporate ESG commitments, customer pull signals
+5. The company's specific positioning within this market
+6. Market risk: what could suppress or delay demand
+
+IMPORTANT: Only state that the company will benefit from a government programme or fund
+if the slides explicitly say so. If the slides describe general market context, attribute it
+as such — "the market offers X" not "the company will receive X".
 
 Slide content:
 {context}
 {findings}""",
 
     "competitive_landscape": """\
-Write the Competitive Landscape section. Identify named competitors if present, assess the
-company's differentiation claims, and flag if competitive analysis is absent or superficial.
+Write the Competitive Landscape section for a preliminary due diligence report.
+
+Cover ALL of the following — flag where depth is lacking:
+1. Named direct competitors: who are they, what do they offer, how big are they?
+2. Named indirect competitors or substitutes
+3. The company's stated differentiation: what specific claims are made?
+4. Competitive moat: proprietary technology, data, contracts, network effects — what is real vs. claimed?
+5. Vulnerability: where could a well-funded competitor replicate this in 12–24 months?
+6. Competitive analysis quality: is the deck's competitive slide credible or superficial?
+
+If no competitors are named, say so. A "no direct competitor" claim in an established market
+is a red flag — note it explicitly. Generic differentiation claims ("faster, cheaper, better")
+without evidence should be called out.
 
 Slide content:
 {context}
 {findings}""",
 
     "investment_rationale": """\
-Write the Investment Rationale section. Summarise the bull case: key strengths, market timing,
-strategic advantages, and reasons to invest. Ground every positive claim in specific slide evidence.
+Write the Investment Rationale section for a preliminary due diligence report.
+
+Provide a structured bull case grounded entirely in slide evidence:
+1. Market timing: why is now the right moment?
+2. Unique advantage: what does this company have that others do not?
+3. Team fit: why is this team positioned to win?
+4. Commercial momentum: what early signals support the investment thesis?
+5. Strategic value: exit potential, strategic acquirers, market leadership path
+
+Every positive claim must be traceable to specific slide content.
+Do not construct a bull case that the slides do not support.
 
 Slide content:
 {context}
 {findings}""",
 
     "areas_to_watch": """\
-Write the Areas to Watch section. Identify the key risks and concerns: execution risks, market
-risks, financial risks, regulatory risks, and anything missing from the deck that a serious
-investor would expect to see.
+Write the Areas to Watch / Key Risks section for a preliminary due diligence report.
+
+Identify and assess the following risk categories — be specific, not generic:
+1. Execution risk: team, timeline, operational complexity
+2. Commercial risk: business model unproven, pricing untested, customer concentration
+3. Technology risk: technical claims unverified, scalability undemonstrated, IP exposed
+4. Financial risk: runway, burn, dependence on further fundraising
+5. Regulatory / legal risk: compliance exposure, sector-specific regulation
+
+For each risk, note whether it is addressable (with diligence) or structural.
 
 Slide content:
 {context}
 {findings}""",
 
+    # ------------------------------------------------------------------
+    # Comments & Observations sub-sections
+    # ------------------------------------------------------------------
+
+# Edited 2024-06-20: refined prompts for sharper, more specific diligence questions grounded in slide content.
     "comments_technology": """\
-Write a Technology observations paragraph for the Comments & Observations section.
-Focus on: technical credibility, IP defensibility, scalability concerns, and any red flags
-in the technology claims.
+Write the Technology sub-section of Comments & Observations.
+Output a numbered list of sharp diligence questions a technical investor would ask
+based on the gaps and unverified claims in the slide content below.
+Each question should be specific to what is actually in (or missing from) the deck —
+not generic technology questions. Aim for 5–8 questions.
+Format: one introductory sentence, then numbered questions (1. 2. 3. etc.), one per line.
 
 Slide content:
 {context}
 {findings}""",
 
     "comments_financials": """\
-Write a Financials observations paragraph for the Comments & Observations section.
-Focus on: quality of financial data presented, revenue model clarity, unit economics,
-burn rate, runway, and any anomalies flagged by the pipeline.
+Write the Financials & Commercials sub-section of Comments & Observations.
+Output a numbered list of specific diligence questions covering revenue quality,
+unit economics, burn rate, financial projections, and commercial contract evidence.
+Base questions on what is stated or notably absent in the slide content below.
+Aim for 5–7 questions. Format: one introductory sentence, then numbered questions.
 
 Slide content:
 {context}
 {findings}""",
 
     "comments_regulations": """\
-Write a Regulatory observations paragraph for the Comments & Observations section.
-Consider: industry-specific regulatory requirements, geographic compliance risks,
-and anything in the deck that suggests regulatory exposure.
+Write the Regulations sub-section of Comments & Observations.
+Output a numbered list of specific regulatory and compliance diligence questions
+relevant to the company's sector, geography, and business model as described below.
+Include questions about licences, data handling, cross-border compliance, and any
+regulatory risks the deck acknowledges. Aim for 3–5 questions.
+Format: one introductory sentence, then numbered questions.
 
 Slide content:
 {context}
 {findings}""",
 
     "comments_gtm": """\
-Write a GTM (Go-to-Market) observations paragraph for the Comments & Observations section.
-Focus on: clarity of GTM strategy, evidence of sales pipeline, channel strategy,
-customer acquisition approach, and early traction evidence.
+Write the GTM Strategy sub-section of Comments & Observations.
+Output a numbered list of specific go-to-market diligence questions covering
+channel strategy, customer acquisition, geographic expansion, competitive positioning,
+and sales pipeline evidence — based on what the slides state or omit.
+Aim for 4–6 questions. Format: one introductory sentence, then numbered questions.
 
 Slide content:
 {context}
 {findings}""",
 
     "comments_competition": """\
-Write a Competition observations paragraph for the Comments & Observations section.
-Focus on: depth of competitive analysis, named competitors, differentiation claims,
-and whether the competitive moat is credible.
+Write the Competition sub-section of Comments & Observations.
+Output a numbered list of specific competitive diligence questions covering
+named competitors, differentiation credibility, moat defensibility, and benchmarking —
+based on the competitive claims in the slide content below.
+Aim for 4–6 questions. Format: one introductory sentence, then numbered questions.
 
 Slide content:
 {context}
 {findings}""",
 
+    # ------------------------------------------------------------------
+    # Final Call / Recommendation
+    # ------------------------------------------------------------------
+
+# edited 2024-06-20: refined prompt for a clear, actionable final call with specific conditions and a positive outcome statement.
     "final_call_a": """\
-Write the Final Call / Recommendation section of a due diligence report.
-Provide a balanced assessment: summarise the bull case and bear case, then give a clear
-recommendation (Pass / Conditional Proceed / Proceed to Full Diligence) with 2–3 specific
-conditions or next steps.
+Write the Final Call section of a preliminary due diligence report.
+Structure your response with exactly three clearly labelled sub-sections:
+
+Assessment Summary:
+One short paragraph (3–5 sentences) giving an overall analytical verdict on the company —
+what it has demonstrated, why it is interesting, and what the key open questions are.
+Write as an investor briefing a partner, not as a summary of the deck.
+
+Areas for Improvement:
+3–5 bullet points (start each with "• ") naming the specific items that must be validated,
+clarified, or strengthened before a full investment decision can be made.
+Be specific — name the claim or gap, not just the category.
+
+Conclusion:
+One short paragraph (2–4 sentences) giving a clear disposition:
+Pass | Request Further Information | Proceed to Full Diligence — and the key condition
+attached to that call. End with one sentence on what a positive outcome would look like.
+
+Use exactly these three sub-headers: "Assessment Summary:", "Areas for Improvement:", "Conclusion:"
 
 All slide content:
 {context}
 {findings}""",
 
+    # ------------------------------------------------------------------
+    # Framework B — IC Memo sections
+    # ------------------------------------------------------------------
+
     "executive_summary_b": """\
-Write the Executive Summary for an IC memo. In 2–3 tight paragraphs: (1) what the company does
-and the opportunity, (2) the headline investment thesis, (3) the two or three things that would
-make or break this deal. Be direct and sceptical.
+Write the Executive Summary for a confidential IC memo.
+
+Cover the following in a tight, sceptical format:
+1. What the company does and the problem it addresses (one sentence each)
+2. The investment thesis — why this could be a meaningful return opportunity
+3. The two or three factors that will make or break this deal
+4. Your overall first impression: is this deck investment-ready or does it require further work?
+
+Be direct. If the deck is thin on substance, say so immediately.
+Do not soften concerns. The IC needs your honest read, not a summary of the pitch.
+
+Format: one short paragraph + 4–6 bullets.
 
 Slide content:
 {context}
 {findings}""",
 
     "ic_summary_positive": """\
-Write 3–5 bullet-style sentences (as plain prose, one per line) describing the positive signals
-from this deal — things that are genuinely encouraging. Be specific and grounded in the deck.
-Do not use bullet characters, just one sentence per line.
+List 4–6 specific positive signals from this deal that the IC should weigh.
+Each point must be grounded in slide content — do not invent positives.
+Write one signal per line, starting each with a dash (- ).
+Be concise: one sentence per line.
 
 Slide content:
 {context}
 {findings}""",
 
     "ic_summary_risks": """\
-Write 3–5 bullet-style sentences (as plain prose, one per line) describing the key risks and
-red flags in this deal. Be direct and specific. Do not soften concerns.
-Do not use bullet characters, just one sentence per line.
+List 4–6 key risks and red flags from this deal for the IC to consider.
+Each point must be specific — no generic "execution risk" without detail.
+Write one risk per line, starting each with a dash (- ).
+Be concise and direct: one sentence per line. Do not soften concerns.
 
 Slide content:
 {context}
@@ -385,8 +642,8 @@ Slide content:
 
     "ic_recommendation": """\
 Write a single, decisive sentence recommending what the IC should do with this deal.
-Choose from: Pass / Request Further Information / Proceed to Full Diligence.
-Include the single most important condition attached to that recommendation.
+Choose from: Pass | Request Further Information | Proceed to Full Diligence.
+Include the single most important condition or next step attached to that recommendation.
 Output only the one sentence — nothing else.
 
 Slide content:
@@ -420,6 +677,23 @@ class SectionWriter:
             print(f"[SectionWriter] LLM unavailable: {e}. Reports will use placeholders.")
             self._llm = None
             self._available = False
+
+
+    
+
+# Edited: 04/06/26
+    def get_company_name(self, result) -> str:
+            """
+            Extract company name using the LLM if available,
+            falling back to programmatic extraction.
+            """
+            if self._available:
+                name = extract_company_name_llm(result, self._llm)
+                if name:
+                    return name
+            # Fallback to programmatic
+            from report_1.doc_helpers import extract_company_name
+            return extract_company_name(result)
 
     # ------------------------------------------------------------------
     # Public API
@@ -475,6 +749,7 @@ class SectionWriter:
         )
         system_prompt = _SYSTEM_A if framework == "A" else _SYSTEM_B
 
+# EDIT: 24/05
         try:
             response = self._llm.complete(
                 system_prompt=system_prompt,
@@ -482,7 +757,7 @@ class SectionWriter:
                 temperature=0.2,
                 max_tokens=max_tokens,
             )
-            return response.text.strip()
+            return _strip_gap_sections(response.text.strip())
         except Exception as e:
             print(f"[SectionWriter] LLM call failed for '{section_key}': {e}")
             return _FALLBACK_NOTE
