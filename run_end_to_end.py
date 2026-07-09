@@ -32,6 +32,6 @@ def run_end_to_end(deck_path: str):
 
 if __name__ == "__main__":
     
-    TEST_DECK = "C:/Users/nelld/StartUpScale360/PDD-SYSTEM/deck.pdf"
+    TEST_DECK = "C:/Users/smk10/Desktop/PDD_SYSTEM/LOW QEM TEASER - May25 (3).pdf"
 
     run_end_to_end(TEST_DECK)

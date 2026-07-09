@@ -49,21 +49,11 @@ def run_pass2(
     pass1_findings: list[AnomalyFinding],
 ) -> list[AnomalyFinding]:
     """
-    Run all LLM-based anomaly checks.
-
-    Skips sections already confirmed missing by Pass 1 (no point asking
-    the LLM about content that deterministically doesn't exist).
-
-    Args:
-        deck: Cleaned DeckDocument.
-        config: Loaded DDConfig.
-        llm: Configured LLM adapter.
-        pass1_findings: Results from Pass 1 (used to skip redundant checks).
-
-    Returns:
-        List of AnomalyFinding objects from Pass 2.
+    Run all LLM-based anomaly checks in parallel using a thread pool.
+    Skips sections already confirmed missing by Pass 1.
     """
-    findings = []
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     checks = config.llm_checks()
 
     # Build set of sections confirmed MISSING by Pass 1
@@ -73,30 +63,60 @@ def run_pass2(
         if f.status == "FLAGGED" and f.anomaly_id.startswith("MS_")
     }
 
+    # Pre-filter — separate skippable from runnable before hitting the thread pool
+    to_skip = []
+    to_run  = []
+
     for check in checks:
-        # Skip if all target sections are confirmed missing
         if _all_sections_missing(check, missing_sections):
-            findings.append(_skipped(check, "Target sections confirmed missing by Pass 1"))
+            to_skip.append((check, "Target sections confirmed missing by Pass 1"))
             continue
-
-        # Get relevant slide text (scoped to target sections only)
         slide_text = deck.text_for_sections(check.target_sections)
-
         if not slide_text.strip():
-            findings.append(_skipped(check, "No relevant slide content found"))
+            to_skip.append((check, "No relevant slide content found"))
             continue
+        to_run.append((check, slide_text))
 
-        finding = _run_llm_check(check, slide_text, llm)
-        findings.append(finding)
+    # Build results map — keyed by check ID to reconstruct original order later
+    findings_map = {}
 
-        status_icon = {"FLAGGED": "🚩", "CLEAR": "✅", "UNCLEAR": "⚠️"}.get(finding.status, "?")
-        print(f"[PASS2] {status_icon} {check.id}: {finding.status} (confidence: {finding.evidence[:60]}...)"
-              if len(finding.evidence) > 60
-              else f"[PASS2] {status_icon} {check.id}: {finding.status}")
+    for check, reason in to_skip:
+        findings_map[check.id] = _skipped(check, reason)
+
+    # Run LLM checks concurrently — 5 workers is safe for Haiku rate limits
+    MAX_WORKERS = 5
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_check = {
+            executor.submit(_run_llm_check, check, slide_text, llm): check
+            for check, slide_text in to_run
+        }
+
+        for future in as_completed(future_to_check):
+            check = future_to_check[future]
+            try:
+                finding = future.result()
+            except Exception as e:
+                finding = _unclear(check, f"Thread error: {str(e)[:80]}", "NOT_FOUND")
+
+            findings_map[check.id] = finding
+
+            # Print progress as each check completes
+            status_icon = {"FLAGGED": "🚩", "CLEAR": "✅", "UNCLEAR": "⚠️"}.get(finding.status, "?")
+            ev = finding.evidence or ""
+            print(
+                f"[PASS2] {status_icon} {check.id}: {finding.status} (confidence: {ev[:60]}...)"
+                if len(ev) > 60
+                else f"[PASS2] {status_icon} {check.id}: {finding.status}"
+            )
+
+    # Reconstruct in original config order — important for consistent report output
+    findings = [findings_map[check.id] for check in checks]
 
     flagged = sum(1 for f in findings if f.status == "FLAGGED")
     unclear = sum(1 for f in findings if f.status == "UNCLEAR")
     print(f"[PASS2] Complete — {flagged} flagged, {unclear} unclear, out of {len(findings)} checks")
+
     return findings
 
 
@@ -116,6 +136,15 @@ def _run_llm_check(check: AnomalyCheck, slide_text: str, llm: BaseLLMAdapter) ->
                 return _unclear(check, "LLM returned non-JSON after retry", "NOT_FOUND")
             continue
         except Exception as e:
+            err = str(e).lower()
+            if "rate" in err or "429" in err or "limit" in err:
+                import time
+                time.sleep(5)
+                try:
+                    result = llm.complete_json(SYSTEM_PROMPT, user_prompt, temperature=0.0)
+                    return _parse_llm_result(check, result)
+                except Exception:
+                    pass
             return _unclear(check, f"LLM call failed: {str(e)[:100]}", "NOT_FOUND")
 
 def _parse_llm_result(check: AnomalyCheck, result: dict) -> AnomalyFinding:

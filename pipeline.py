@@ -122,6 +122,13 @@ def run_pipeline(
     if run_llm_pass:
         print("[3/5] Running Pass 2 (LLM)...")
         from llm.adapter import get_llm
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            pass
+        print(f"[DEBUG] llm_provider argument: '{llm_provider}'")
+        print(f"[DEBUG] LLM_PROVIDER env: '{os.environ.get('LLM_PROVIDER')}'")
         llm = get_llm(llm_provider)
         pass2_findings = run_pass2(deck, config, llm, pass1_findings)
     else:

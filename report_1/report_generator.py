@@ -32,25 +32,13 @@ from report_1.framework_a import build_framework_a
 from report_1.framework_b import build_framework_b
 
 
-def generate_reports(result, output_dir: str = "reports/") -> dict:
+def generate_reports(result, output_dir: str = "reports/", on_section_complete=None) -> dict:
     """
-    Generate Framework A (DD Report) and Framework B (IC Memo) Word documents.
-
-    Parameters
-    ----------
-    result : PipelineResult
-        Output of the Layer 1-3 pipeline.
-    output_dir : str
-        Directory to write the two .docx files into (created if absent).
-
-    Returns
-    -------
-    dict
-        {
-            "framework_a_path": "<output_dir>/dd_report_<stem>_<timestamp>.docx",
-            "framework_b_path": "<output_dir>/ic_memo_<stem>_<timestamp>.docx",
-        }
+    Generate Framework A (DD Report) and Framework B (IC Memo) Word documents
+    in parallel to halve report generation time.
     """
+    from concurrent.futures import ThreadPoolExecutor
+
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
@@ -66,8 +54,33 @@ def generate_reports(result, output_dir: str = "reports/") -> dict:
     b_path = out / f"ic_memo_{source_stem}_{ts}.docx"
 
     provider = os.environ.get("LLM_PROVIDER", "groq")
-    build_framework_a(result, provider=provider).save(str(a_path))
-    build_framework_b(result, provider=provider).save(str(b_path))
+
+    errors = []
+
+    def _build_a():
+        try:
+            print("[REPORT] Starting Framework A (DD Report)...")
+            build_framework_a(result, provider=provider, on_section_complete=on_section_complete).save(str(a_path))
+            print("[REPORT] Framework A complete.")
+        except Exception as e:
+            errors.append(f"Framework A failed: {e}")
+
+    def _build_b():
+        try:
+            print("[REPORT] Starting Framework B (IC Memo)...")
+            build_framework_b(result, provider=provider, on_section_complete=on_section_complete).save(str(b_path))
+            print("[REPORT] Framework B complete.")
+        except Exception as e:
+            errors.append(f"Framework B failed: {e}")
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        fa = executor.submit(_build_a)
+        fb = executor.submit(_build_b)
+        fa.result()
+        fb.result()
+
+    if errors:
+        raise RuntimeError(" | ".join(errors))
 
     return {
         "framework_a_path": str(a_path),

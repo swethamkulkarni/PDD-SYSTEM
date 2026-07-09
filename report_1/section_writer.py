@@ -303,7 +303,37 @@ GROUNDING RULES — absolute, override everything else:
    "the deck does not address" statements — write only about what is present.
 5. Attribute all claims: "the company claims", "the deck states", "management asserts"."""
 #  Edit: 24/05 - changed for gaps/concerns rules 4 and 5
+# ---------------------------------------------------------------------------
+# Founder-facing suggestion prompt (Company Mode)
+# ---------------------------------------------------------------------------
 
+_SYSTEM_SUGGESTION = """\
+You are a pitch deck coach helping a startup founder strengthen their fundraising deck
+before talking to investors. You are direct and specific, never generic, and always
+encouraging — founders should feel motivated to fix the gap, not discouraged by it.
+
+For the flagged issue you are given, write ONE short, specific, actionable suggestion
+telling the founder exactly what to add or change. Include a concrete example of what
+strong content would look like for their specific situation — not generic advice like
+"add more detail" or "be more specific".
+
+RULES:
+- 2-3 sentences maximum.
+- No markdown, no bullet points, no headers — plain text only.
+- Do not restate the problem — the founder already sees the flag. Go straight to the fix.
+- Ground your example in the actual slide content provided, where possible.
+- Never use investor-facing language like "this is a red flag" or "material gap" —
+  speak directly to the founder as a coach, not an auditor."""
+
+
+_SUGGESTION_PROMPT_TEMPLATE = """\
+Flagged issue: {label}
+What was found: {evidence}
+
+Relevant slide content:
+{context}
+
+Write the founder-facing suggestion now."""
 # ---------------------------------------------------------------------------
 # Section-specific user prompt templates
 # ---------------------------------------------------------------------------
@@ -784,7 +814,92 @@ class SectionWriter:
         # Split on newlines and strip empty lines
         return [line.strip() for line in text.splitlines() if line.strip()]
 
+    def write_suggestion(
+        self,
+        finding,
+        slide_texts: list[str],
+        unknown_texts: list[str] = None,
+        max_tokens: int = 150,
+    ) -> str:
+        """
+        Generate a specific, actionable, founder-facing suggestion for one
+        flagged or unclear finding. Used in company/founder mode.
+        """
+        if not self._available:
+            return "Review this section with your team and add specific evidence to address the gap."
 
+        context = _build_slide_context(slide_texts, unknown_texts or [], None)
+        if not context:
+            context = "[No relevant slide content found for this section.]"
+
+        evidence = getattr(finding, "evidence", "") or "Not found in the deck."
+        label    = getattr(finding, "label", "")
+
+        user_prompt = _SUGGESTION_PROMPT_TEMPLATE.format(
+            label=label,
+            evidence=evidence,
+            context=context,
+        )
+
+        try:
+            response = self._llm.complete(
+                system_prompt=_SYSTEM_SUGGESTION,
+                user_prompt=user_prompt,
+                temperature=0.3,
+                max_tokens=max_tokens,
+            )
+            return response.text.strip()
+        except Exception as e:
+            print(f"[SectionWriter] Suggestion failed for '{getattr(finding, 'anomaly_id', '?')}': {e}")
+            return "Review this section with your team and add specific evidence to address the gap."
+    
+    def write_company_overview(self, result) -> str:
+        """
+        Generate a 2-3 sentence company overview from cover/problem/solution slides.
+        Used for the results screen summary strip.
+            """
+        if not self._available:
+            return ""
+
+        # Collect cover, problem and solution slide text
+        context_parts = []
+        try:
+            for slide in result.deck.slides[:6]:
+                section = (getattr(slide, "detected_section", "") or "").upper()
+                if section in ("COVER", "PROBLEM", "SOLUTION", "BUSINESS_MODEL"):
+                    txt = (getattr(slide, "cleaned_text", "")
+                        or getattr(slide, "raw_text", "") or "").strip()
+                    if txt and not _is_boilerplate(txt):
+                        context_parts.append(txt)
+        except AttributeError:
+            return ""
+
+        if not context_parts:
+            return ""
+
+        context = "\n\n".join(context_parts)[:2000]
+
+        try:
+            response = self._llm.complete(
+                system_prompt=(
+                    "You write concise company descriptions for investor reports. "
+                    "Write 2-3 sentences maximum. Be factual and specific — "
+                    "include what the company does, who it serves, and one concrete "
+                    "fact (product, customer, or metric) if present in the content. "
+                    "No hype, no adjectives like 'revolutionary' or 'innovative'. "
+                    "Plain professional prose only."
+                ),
+                user_prompt=(
+                    f"Write a 2-3 sentence factual description of this company "
+                    f"based on their pitch deck content:\n\n{context}"
+                ),
+                temperature=0.1,
+                max_tokens=120,
+            )
+            return response.text.strip()
+        except Exception as e:
+            print(f"[SectionWriter] Overview generation failed: {e}")
+            return ""
 # ---------------------------------------------------------------------------
 # Helper: extract all slide texts from result for a given section key
 # ---------------------------------------------------------------------------

@@ -1,0 +1,429 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+.app{background:#050d1a;min-height:700px;color:#e8eaed;position:relative;overflow:hidden}
+.screen{display:none;min-height:700px}
+.screen.active{display:flex;flex-direction:column}
+.btn-blue{background:#29a8ff;color:#000;border:none;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s}
+.btn-blue:hover{background:#4db8ff}
+.btn-ghost{background:transparent;color:#29a8ff;border:1.5px solid #29a8ff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.btn-ghost:hover{background:rgba(41,168,255,0.08)}
+.inp{background:#0a1628;border:1px solid #0f2040;color:#e8eaed;padding:10px 14px;border-radius:8px;font-size:14px;width:100%;outline:none;transition:border 0.15s}
+.inp:focus{border-color:#29a8ff}
+.inp::placeholder{color:#1e3a5f}
+label{font-size:12px;color:#4a6a8a;display:block;margin-bottom:5px}
+.logo-text{font-size:22px;font-weight:700;letter-spacing:-0.5px}
+.logo-text span{color:#29a8ff}
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid #091628}
+
+.landing-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+.hero-badge{background:rgba(41,168,255,0.08);border:1px solid rgba(41,168,255,0.18);color:#29a8ff;font-size:12px;padding:4px 14px;border-radius:20px;margin-bottom:24px;display:inline-block}
+.hero-h1{font-size:42px;font-weight:700;line-height:1.15;margin-bottom:14px;letter-spacing:-1px;color:#ffffff}
+.hero-h1 span{color:#29a8ff}
+.hero-sub{font-size:16px;color:#4a6a8a;margin-bottom:36px;max-width:480px}
+.role-cards{display:flex;gap:16px;margin-bottom:32px}
+.role-card{background:#070f1e;border:1.5px solid #0f2040;border-radius:12px;padding:28px 32px;cursor:pointer;transition:all 0.2s;text-align:center;min-width:180px}
+.role-card:hover,.role-card.selected{border-color:#29a8ff;background:rgba(41,168,255,0.05)}
+.role-icon{width:44px;height:44px;border-radius:10px;background:rgba(41,168,255,0.1);margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.role-title{font-size:15px;font-weight:600;color:#ffffff;margin-bottom:4px}
+.role-desc{font-size:12px;color:#4a6a8a}
+
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:32px}
+.auth-card{background:#070f1e;border:1px solid #0f2040;border-radius:16px;padding:36px;width:100%;max-width:420px}
+.auth-title{font-size:20px;font-weight:700;margin-bottom:6px;color:#ffffff}
+.auth-sub{font-size:13px;color:#4a6a8a;margin-bottom:24px}
+.form-row{margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.auth-footer{text-align:center;font-size:13px;color:#4a6a8a;margin-top:16px}
+.auth-footer a{color:#29a8ff;cursor:pointer;text-decoration:none}
+.role-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(41,168,255,0.08);border:1px solid rgba(41,168,255,0.18);color:#29a8ff;font-size:12px;padding:4px 12px;border-radius:20px;margin-bottom:20px}
+
+.upload-area{border:2px dashed #0f2040;border-radius:12px;padding:48px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:20px}
+.upload-area:hover{border-color:#29a8ff;background:rgba(41,168,255,0.03)}
+.upload-main{padding:32px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:560px;margin:0 auto;width:100%}
+.upload-title{font-size:18px;font-weight:600;margin-bottom:6px;color:#ffffff}
+.upload-sub{font-size:13px;color:#4a6a8a;margin-bottom:24px}
+
+.progress-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.ocean-wrap{width:100%;max-width:600px;background:#030810;border-radius:16px;overflow:hidden;border:1px solid #091628;margin-bottom:32px}
+.ocean-top{padding:20px 24px 8px;display:flex;justify-content:space-between;align-items:center}
+.ocean-title{font-size:14px;font-weight:500;color:#29a8ff}
+.ocean-pct{font-size:22px;font-weight:700;color:#29a8ff}
+.ocean-canvas{display:block;width:100%;height:120px;background:#030810}
+.ocean-floor{height:6px;background:#070f1e}
+.stages-list{width:100%;max-width:600px}
+.stage-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #091628}
+.stage-row:last-child{border:none}
+.stage-dot{width:8px;height:8px;border-radius:50%;background:#0f2040;flex-shrink:0;transition:background 0.4s}
+.stage-dot.done{background:#29a8ff}
+.stage-dot.active{background:#29a8ff;box-shadow:0 0 8px #29a8ff}
+.stage-name{font-size:13px;color:#4a6a8a;flex:1}
+.stage-name.done{color:#e8eaed}
+.stage-name.active{color:#29a8ff}
+.stage-status{font-size:11px;color:#0f2040}
+.stage-status.done{color:#29a8ff}
+.stage-status.active{color:#29a8ff}
+
+.results-shell{display:flex;flex:1;min-height:0}
+.results-sidebar{width:200px;min-width:200px;background:#030810;border-right:1px solid #091628;padding:16px 12px;display:flex;flex-direction:column}
+.sb-section{margin-bottom:20px}
+.sb-label{font-size:10px;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.08em;padding:0 8px;margin-bottom:6px}
+.sb-item{padding:7px 10px;border-radius:8px;font-size:13px;color:#4a6a8a;cursor:pointer;transition:all 0.15s;margin-bottom:2px}
+.sb-item:hover{background:#070f1e;color:#e8eaed}
+.sb-item.active{background:#070f1e;color:#29a8ff;font-weight:500}
+.sb-version{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:6px;font-size:12px;color:#4a6a8a;cursor:pointer;margin-bottom:2px}
+.sb-version:hover{background:#070f1e}
+.sb-version.active{color:#29a8ff}
+.v-dot{width:6px;height:6px;border-radius:50%;background:#0f2040}
+.v-dot.active{background:#29a8ff}
+.results-main{flex:1;overflow-y:auto;padding:20px 24px}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.m-card{background:#070f1e;border:1px solid #091628;border-radius:10px;padding:14px}
+.m-label{font-size:11px;color:#1e3a5f;margin-bottom:6px}
+.m-val{font-size:24px;font-weight:700}
+.m-val.blue{color:#29a8ff}
+.m-val.red{color:#ff4d4d}
+.m-val.amber{color:#f0a500}
+.m-sub{font-size:10px;color:#1e3a5f;margin-top:2px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.panel{background:#070f1e;border:1px solid #091628;border-radius:10px;padding:16px}
+.panel-title{font-size:11px;font-weight:500;color:#4a6a8a;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em}
+.flag-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #091628}
+.flag-item:last-child{border:none}
+.sev{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+.sev.high{background:rgba(255,77,77,0.12);color:#ff4d4d}
+.sev.med{background:rgba(240,165,0,0.1);color:#f0a500}
+.flag-q{font-size:12px;color:#c8d0dc;line-height:1.4}
+.flag-id{font-size:10px;color:#1e3a5f;margin-top:2px}
+.summary-p{font-size:12px;color:#7a9ab8;line-height:1.75}
+.report-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rep-card{background:#070f1e;border:1px solid #091628;border-radius:10px;padding:14px}
+.rep-name{font-size:13px;font-weight:600;color:#ffffff;margin-bottom:3px}
+.rep-desc{font-size:11px;color:#1e3a5f;margin-bottom:12px}
+.rep-actions{display:flex;gap:8px}
+.rep-btn{font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:500;transition:all 0.15s}
+.rep-btn.primary{background:#29a8ff;color:#000;border:none}
+.rep-btn.primary:hover{background:#4db8ff}
+.rep-btn.ghost{background:transparent;color:#29a8ff;border:1px solid rgba(41,168,255,0.25)}
+.rep-btn.ghost:hover{background:rgba(41,168,255,0.08)}
+
+.chat-wrap{background:#070f1e;border:1px solid #091628;border-radius:10px;margin-bottom:16px}
+.chat-header{padding:12px 16px;border-bottom:1px solid #091628;display:flex;align-items:center;justify-content:space-between}
+.chat-title{font-size:11px;font-weight:500;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.05em}
+.chat-badge{font-size:10px;background:rgba(41,168,255,0.1);color:#29a8ff;padding:2px 8px;border-radius:10px}
+.chat-msgs{padding:12px 16px;min-height:80px;max-height:140px;overflow-y:auto}
+.chat-msg{margin-bottom:10px}
+.msg-who{font-size:10px;color:#1e3a5f;margin-bottom:3px}
+.msg-who.you{color:#29a8ff}
+.msg-text{font-size:12px;color:#7a9ab8;background:#0a1628;padding:8px 12px;border-radius:8px;line-height:1.5;display:inline-block;max-width:90%}
+.msg-text.you{background:rgba(41,168,255,0.1);color:#a8cbea}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #091628}
+.chat-inp{flex:1;background:#0a1628;border:1px solid #0f2040;color:#e8eaed;padding:8px 12px;border-radius:8px;font-size:13px;outline:none}
+.chat-inp::placeholder{color:#1e3a5f}
+.chat-inp:focus{border-color:#29a8ff}
+.chat-send{background:#29a8ff;color:#000;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+
+.modal-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(2,6,16,0.85);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-box{background:#070f1e;border:1px solid #0f2040;border-radius:14px;padding:28px;width:360px;position:relative}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:6px;color:#ffffff}
+.modal-sub{font-size:13px;color:#4a6a8a;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#4a6a8a;font-size:18px;cursor:pointer}
+</style>
+
+<div class="app" id="app">
+
+<div class="screen active" id="s-landing">
+  <div class="top-nav">
+    <div class="logo-text">UP<span>SCALE</span></div>
+    <button class="btn-ghost" onclick="go('s-login')">Sign in</button>
+  </div>
+  <div class="landing-hero">
+    <div class="hero-badge">AI-powered pitch deck due diligence</div>
+    <h1 class="hero-h1">Analyse any deck.<br><span>In minutes.</span></h1>
+    <p class="hero-sub">Deep due diligence reports and IC memos generated automatically. Built for investors and founders.</p>
+    <div class="role-cards">
+      <div class="role-card" id="rc-investor" onclick="selectRole('investor')">
+        <div class="role-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#29a8ff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="role-title">Investor</div>
+        <div class="role-desc">Evaluate incoming decks</div>
+      </div>
+      <div class="role-card" id="rc-company" onclick="selectRole('company')">
+        <div class="role-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#29a8ff" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        </div>
+        <div class="role-title">Company</div>
+        <div class="role-desc">Strengthen your own deck</div>
+      </div>
+    </div>
+    <button class="btn-blue" id="continue-btn" style="opacity:0.35;pointer-events:none" onclick="go('s-signup')">Continue</button>
+    <p style="font-size:13px;color:#1e3a5f;margin-top:16px">Already have an account? <a style="color:#29a8ff;cursor:pointer" onclick="go('s-login')">Sign in</a></p>
+  </div>
+</div>
+
+<div class="screen" id="s-signup">
+  <div class="top-nav">
+    <div class="logo-text">UP<span>SCALE</span></div>
+    <button class="btn-ghost" onclick="go('s-login')">Sign in instead</button>
+  </div>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="role-pill" id="signup-role-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#29a8ff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+        <span id="pill-text">Investor</span>
+      </div>
+      <div class="auth-title">Create your account</div>
+      <div class="auth-sub">Get started with AI-powered due diligence</div>
+      <div class="form-grid">
+        <div class="form-row"><label>First name</label><input class="inp" placeholder="Swethal" /></div>
+        <div class="form-row"><label>Last name</label><input class="inp" placeholder="Kulkarni" /></div>
+      </div>
+      <div class="form-row"><label>Email address</label><input class="inp" placeholder="you@startupscale360.com" /></div>
+      <div class="form-row"><label>Company</label><input class="inp" placeholder="StartupScale360" /></div>
+      <div class="form-row" style="margin-bottom:20px"><label>Password</label><input class="inp" type="password" placeholder="••••••••" /></div>
+      <button class="btn-blue" style="width:100%" onclick="go('s-login')">Create account</button>
+      <div class="auth-footer">Already have an account? <a onclick="go('s-login')">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-login">
+  <div class="top-nav">
+    <div class="logo-text">UP<span>SCALE</span></div>
+    <button class="btn-ghost" onclick="go('s-signup')">Create account</button>
+  </div>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to continue your analysis</div>
+      <div class="form-row"><label>Email address</label><input class="inp" placeholder="you@startupscale360.com" /></div>
+      <div class="form-row" style="margin-bottom:20px"><label>Password</label><input class="inp" type="password" placeholder="••••••••" /></div>
+      <button class="btn-blue" style="width:100%" onclick="go('s-upload')">Sign in</button>
+      <div class="auth-footer">No account? <a onclick="go('s-signup')">Create one</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-upload">
+  <div class="top-nav">
+    <div class="logo-text">UP<span>SCALE</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:13px;color:#4a6a8a">StartupScale360</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(41,168,255,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#29a8ff">SK</div>
+    </div>
+  </div>
+  <div class="upload-main">
+    <div style="margin-bottom:28px;text-align:center">
+      <div class="upload-title">Upload your pitch deck</div>
+      <div class="upload-sub">We'll run 44 checks and generate your full DD report and IC memo</div>
+    </div>
+    <div class="upload-area" style="width:100%" onclick="go('s-progress')">
+      <svg style="width:48px;height:48px;margin:0 auto 16px;display:block;opacity:0.35" viewBox="0 0 48 48" fill="none" stroke="#29a8ff" stroke-width="1.5"><path d="M24 32V16M17 23l7-7 7 7"/><rect x="8" y="8" width="32" height="32" rx="4"/></svg>
+      <div style="font-size:15px;font-weight:500;color:#ffffff;margin-bottom:6px">Drop your PDF or PPTX here</div>
+      <div style="font-size:13px;color:#1e3a5f">or click to browse · Max 50MB</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:#1e3a5f;margin-bottom:16px;width:100%">
+      <div style="flex:1;height:1px;background:#091628"></div>recent analyses<div style="flex:1;height:1px;background:#091628"></div>
+    </div>
+    <div style="background:#070f1e;border:1px solid #091628;border-radius:10px;padding:12px 16px;width:100%;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="go('s-results')">
+      <div style="width:32px;height:32px;border-radius:8px;background:rgba(41,168,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#29a8ff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:#e8eaed">LOW QEM TEASER — May 2025</div>
+        <div style="font-size:11px;color:#1e3a5f">30 Mar 2026 · 3 flags · v2</div>
+      </div>
+      <div style="font-size:11px;color:#29a8ff">View</div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-progress">
+  <div class="top-nav">
+    <div class="logo-text">UP<span>SCALE</span></div>
+    <span style="font-size:13px;color:#1e3a5f">LOW QEM TEASER — May 2025.pdf</span>
+  </div>
+  <div class="progress-screen">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:18px;font-weight:600;color:#ffffff;margin-bottom:6px">Analysing your deck</div>
+      <div style="font-size:13px;color:#4a6a8a">Sit back — your fish is on the case</div>
+    </div>
+    <div class="ocean-wrap">
+      <div class="ocean-top">
+        <span class="ocean-title">Analysis in progress</span>
+        <span class="ocean-pct" id="pct-text">0%</span>
+      </div>
+      <canvas class="ocean-canvas" id="ocean" width="600" height="120"></canvas>
+      <div class="ocean-floor"></div>
+    </div>
+    <div class="stages-list" id="stages-list"></div>
+    <button class="btn-blue" id="view-results-btn" style="margin-top:24px;display:none" onclick="go('s-results')">View results</button>
+  </div>
+</div>
+
+<div class="screen" id="s-results">
+  <div class="top-nav">
+    <div class="logo-text">UP<span>SCALE</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn-ghost" style="font-size:12px;padding:7px 16px" onclick="showModal()">Email reports</button>
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(41,168,255,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#29a8ff">SK</div>
+    </div>
+  </div>
+  <div class="results-shell">
+    <div class="results-sidebar">
+      <div class="sb-section">
+        <div class="sb-label">Views</div>
+        <div class="sb-item active">Overview</div>
+        <div class="sb-item">DD report</div>
+        <div class="sb-item">IC memo</div>
+        <div class="sb-item">Flags</div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Versions</div>
+        <div class="sb-version active"><span>v2 — current</span><div class="v-dot active"></div></div>
+        <div class="sb-version"><span>v1 — original</span><div class="v-dot"></div></div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="padding:8px 10px;border-top:1px solid #091628;margin-top:12px">
+        <button class="btn-ghost" style="width:100%;font-size:12px;padding:7px" onclick="go('s-upload')">+ New analysis</button>
+      </div>
+    </div>
+    <div class="results-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <div style="font-size:16px;font-weight:600;color:#ffffff">LOW QEM TEASER — May 2025</div>
+          <div style="font-size:12px;color:#1e3a5f;margin-top:2px">13 slides · Battery materials · Qatar · 30 Mar 2026</div>
+        </div>
+        <div style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.18);color:#ff4d4d;font-size:12px;font-weight:500;padding:4px 14px;border-radius:20px">Pass — conditions apply</div>
+      </div>
+      <div class="metrics-grid">
+        <div class="m-card"><div class="m-label">Total checks</div><div class="m-val blue">44</div><div class="m-sub">10 deterministic · 34 LLM</div></div>
+        <div class="m-card"><div class="m-label">Flagged</div><div class="m-val red">3</div><div class="m-sub">of 44 checks</div></div>
+        <div class="m-card"><div class="m-label">High severity</div><div class="m-val red">2</div><div class="m-sub">IC attention needed</div></div>
+        <div class="m-card"><div class="m-label">Medium severity</div><div class="m-val amber">1</div><div class="m-sub">worth reviewing</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Flagged items</div>
+          <div class="flag-item"><span class="sev high">HIGH</span><div><div class="flag-q">No clearly identified Problem slide</div><div class="flag-id">MS_001 · Structural</div></div></div>
+          <div class="flag-item"><span class="sev high">HIGH</span><div><div class="flag-q">No Team slide present</div><div class="flag-id">MS_003 · Structural</div></div></div>
+          <div class="flag-item"><span class="sev med">MED</span><div><div class="flag-q">No Competitive Landscape slide</div><div class="flag-id">MS_008 · Structural</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">IC memo summary</div>
+          <div class="summary-p">Low-Qem proposes Qatar's first battery materials plant, targeting chronic under-investment in battery-grade products outside China. Counter-cyclical thesis: invest during a lithium price downturn to secure long-term supply advantage.<br><br>Make-or-break: securing feedstock &amp; offtake agreements, contractual risk allocation, and executing a $900m project to 2030.</div>
+        </div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-header">
+          <span class="chat-title">Add context · regenerates analysis</span>
+          <span class="chat-badge" id="chat-badge">v2 active</span>
+        </div>
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="chat-msg"><div class="msg-who">System</div><div class="msg-text">Analysis complete. Add context below to refine the report — a new version will be generated.</div></div>
+          <div class="chat-msg"><div class="msg-who you">You · v1</div><div class="msg-text you">The CEO Greg has 22 years in critical minerals. Please factor this into the team risk rating.</div></div>
+          <div class="chat-msg"><div class="msg-who">System · v2</div><div class="msg-text">Team risk updated. Greg's 22-year track record noted positively. IC memo section 3 regenerated.</div></div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-inp" id="chat-input" placeholder="Add context, correct a finding, or ask a question..." onkeydown="sendChat(event)" />
+          <button class="chat-send" onclick="sendChatClick()">Send</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Reports</div>
+      <div class="report-cards">
+        <div class="rep-card"><div class="rep-name">Due Diligence Report</div><div class="rep-desc">11-section analyst report · Framework A · v2</div><div class="rep-actions"><button class="rep-btn primary">Download .docx</button><button class="rep-btn ghost" onclick="showModal()">Email</button></div></div>
+        <div class="rep-card"><div class="rep-name">IC Memo</div><div class="rep-desc">8-section IC memo · Framework B · v2</div><div class="rep-actions"><button class="rep-btn primary">Download .docx</button><button class="rep-btn ghost" onclick="showModal()">Email</button></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="email-modal" style="display:none">
+    <div class="modal-box">
+      <button class="modal-close" onclick="hideModal()">×</button>
+      <div class="modal-title">Email reports</div>
+      <div class="modal-sub">Both reports sent as .docx attachments</div>
+      <div class="form-row"><label>Recipient email</label><input class="inp" placeholder="partner@startupscale360.com" /></div>
+      <div class="form-row" style="margin-top:12px"><label>Note (optional)</label><textarea class="inp" rows="2" placeholder="e.g. Please review before Thursday's IC meeting" style="resize:none"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" style="font-size:13px;padding:8px 18px" onclick="hideModal()">Cancel</button>
+        <button class="btn-blue" style="font-size:13px;padding:8px 20px" onclick="hideModal()">Send reports</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+var currentRole='investor',stageProgress=0,animFrame,fishX=0,waveOffset=0,bubbles=[],progressPct=0,targetPct=0,chatMsgCount=0;
+var stages=[
+  {name:'Ingesting deck',desc:'Parsing slides and extracting text'},
+  {name:'Cleaning & classifying',desc:'Normalising sections'},
+  {name:'Deterministic checks',desc:'Running 10 structural checks'},
+  {name:'LLM analysis',desc:'Running 34 deep checks via AI'},
+  {name:'Generating reports',desc:'Writing DD report and IC memo'}
+];
+function go(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  if(id==='s-progress')startProgress();
+}
+function selectRole(r){
+  currentRole=r;
+  document.getElementById('rc-investor').classList.remove('selected');
+  document.getElementById('rc-company').classList.remove('selected');
+  document.getElementById('rc-'+r).classList.add('selected');
+  var btn=document.getElementById('continue-btn');
+  btn.style.opacity='1';btn.style.pointerEvents='auto';
+  document.getElementById('pill-text').textContent=r==='investor'?'Investor':'Company';
+}
+function buildStages(){
+  var el=document.getElementById('stages-list');el.innerHTML='';
+  stages.forEach(function(s,i){
+    var row=document.createElement('div');row.className='stage-row';row.id='stage-'+i;
+    row.innerHTML='<div class="stage-dot" id="dot-'+i+'"></div><div class="stage-name" id="sname-'+i+'">'+s.name+'</div><div class="stage-status" id="sstatus-'+i+'">Waiting</div>';
+    el.appendChild(row);
+  });
+}
+function startProgress(){
+  buildStages();stageProgress=0;progressPct=0;targetPct=0;fishX=0;bubbles=[];
+  document.getElementById('view-results-btn').style.display='none';
+  document.getElementById('pct-text').textContent='0%';
+  if(animFrame)cancelAnimationFrame(animFrame);
+  var canvas=document.getElementById('ocean');
+  var ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||600;
+  drawOcean(ctx,canvas);runStages();
+}
+function drawOcean(ctx,canvas){
+  var W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#030810';ctx.fillRect(0,0,W,H);
+  waveOffset+=0.035;
+  for(var w=0;w<3;w++){
+    ctx.beginPath();ctx.strokeStyle='rgba(41,168,255,0.'+(6+w*2)+')';ctx.lineWidth=1;
+    for(var x=0;x<=W;x+=4){
+      var y=H*0.25+(w*16)+Math.sin(x*0.018+waveOffset+w*1.2)*9;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }ctx.stroke();
+  }
+  bubbles.forEach(function(b,i){
+    b.y-=b.speed;b.x+=Math.sin(b.y*0.05)*0.4;
+    b.opacity=Math.min(0.6,b.opacity+0.015);
+    if(b.y<-5){bubbles.splice(i,1);return;}
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(41,168,255,'+b.opacity+')';ctx.lineWidth=0.8;ctx.stroke();
+  });
+  if(Math.random()<0.07&&bubbles.length<18)
+    bubbles.push({x:20+Math.random()*(W-40),y:H-8,r:1+Math.random()*2.5,speed:0.4+Math.random()*1,opacity:0});
+  drawFish(ctx,W,H);
+  progressPct+=(targetPct-progressPct)*0.035;
+  document.getElementById('pct-text').textContent=Math.round(progressPct)+'%';
+  var tw=W-40;
+  ctx.fillStyle='#070f1e';ctx.fillRect(20,H-20,tw,3);
+  ctx.fillStyle='#29a8ff';ctx.fillRect(20,H-20,tw*(progressPct/100),3);
+  animFrame=requestAnimationFrame(function(){drawOcean(ctx,canvas)});
+}
+function drawFish(ctx,W,H){
+  fishX=24+(W-80)*(progressPct/100);
+  var fy=H*0.48+Math.sin(Date.now()*0.0025)*11

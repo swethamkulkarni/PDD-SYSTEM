@@ -64,7 +64,7 @@ class ClaudeAdapter(BaseLLMAdapter):
     For zero data retention: use claude.ai Enterprise or API with no-log endpoint.
     """
 
-    def __init__(self, model: str = "claude-sonnet-4-20250514"):
+    def __init__(self, model: str = "claude-haiku-4-5"):
         try:
             import anthropic
             self._client = anthropic.Anthropic(

@@ -48,7 +48,7 @@ from report_1.section_writer import (
 def _write(writer: SectionWriter, doc: Document, section_key: str,
            slide_texts: list, unknown_texts: list,
            findings_summary: str = "", framework: str = "B",
-           max_tokens: int = 600, slide_tables: list = None) -> None:
+           max_tokens: int = 600, slide_tables: list = None, on_complete=None) -> None:
     """Generate LLM prose (IC memo tone) and write using the mixed (bullet-aware) renderer."""
     text = writer.write_section(
         section_key, slide_texts, unknown_texts,
@@ -63,7 +63,7 @@ def _gap(doc: Document, message: str) -> None:
     add_gap_note(doc, message)
 
 
-def build_framework_b(result, provider: str = None) -> Document:
+def build_framework_b(result, provider: str = None, on_section_complete=None) -> Document:
     """
     Build the 8-section IC Memo and return a python-docx Document.
 
@@ -141,7 +141,7 @@ def build_framework_b(result, provider: str = None) -> Document:
            slide_texts=exec_slides or unknowns[:4],
            unknown_texts=unknowns,
            findings_summary=all_findings_summary(result),
-           max_tokens=600)
+           max_tokens=600, on_complete= on_section_complete)
 
     add_heading(doc, "Headline Risk Snapshot", level=2)
     add_body(doc,
@@ -165,7 +165,7 @@ def build_framework_b(result, provider: str = None) -> Document:
            slide_texts=mkt_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "market", "ms", "tam"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not mkt_slides:
         _gap(doc, "No market opportunity or problem slides identified — market sizing unverified.")
 
@@ -190,7 +190,7 @@ def build_framework_b(result, provider: str = None) -> Document:
            slide_texts=tech_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "tech", "ip", "ms", "product"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not tech_slides:
         _gap(doc, "Technical architecture, AI/ML detail, and IP defensibility not described in the deck.")
 
@@ -223,7 +223,7 @@ def build_framework_b(result, provider: str = None) -> Document:
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "financ", "revenue", "valuat", "cap", "fund"),
            slide_tables=_tables("financials", "cap_table", "traction"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not fin_slides:
         _gap(doc, "No financial slides identified — revenue model, burn rate, and runway unknown.")
 
@@ -244,7 +244,7 @@ def build_framework_b(result, provider: str = None) -> Document:
            slide_texts=tract_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "traction", "gtm", "customer", "metric", "growth"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not tract_slides:
         _gap(doc, "No traction or GTM slides identified — sales pipeline and commercial evidence absent.")
 
@@ -313,7 +313,7 @@ def build_framework_b(result, provider: str = None) -> Document:
            slide_texts=comp_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "competi", "ms", "market"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not comp_slides:
         _gap(doc, "No competitive landscape slide identified — differentiation claims unverified.")
 
@@ -360,7 +360,7 @@ def build_framework_b(result, provider: str = None) -> Document:
                unknown_texts=unknowns,
                findings_summary=findings_summary_for(result, *finding_keys) if finding_keys
                                 else all_findings_summary(result),
-               max_tokens=450)
+               max_tokens=450, on_complete=on_section_complete)
 
     # ── 8. IC Memo Summary ───────────────────────────────────────────────────
     add_heading(doc, "8. IC Memo Summary", level=1)

@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StartupScale360 — DD Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1f6fff;
+  --blue-light:#e8f0ff;
+  --blue-mid:rgba(31,111,255,0.1);
+  --text:#0f1117;
+  --text2:#4b5263;
+  --text3:#9198a8;
+  --bg:#f5f6f8;
+  --surface:#ffffff;
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.13);
+  --red:#dc2626;--red-bg:#fef2f2;
+  --amber:#d97706;--amber-bg:#fffbeb;
+  --green:#059669;--green-bg:#ecfdf5;
+  --font:'Inter',system-ui,sans-serif;
+--font-head:'Libre Baskerville',serif;
+  --radius:10px;
+}
+body{font-family:var(--font);font-size:16px;color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh}
+body{
+  background:linear-gradient(to bottom, #f8fafc 0%, #ffffff 40%);
+}
+/* ── Screens ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* Remove text cursor everywhere */
+body {
+  caret-color: transparent;
+}
+input, textarea {
+  caret-color: auto;
+}
+
+.card,
+button,
+.navbar,
+.selection-card {
+  user-select: none;
+}
+.selection-card:focus {
+  outline: none;
+}
+/* ── Nav ── */
+.nav-left{display:flex;align-items:center;gap:14px}
+.nav-back{
+  border:1px solid var(--border2);
+  background:var(--surface);
+  color:var(--text2);
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:12px;
+  font-weight:500;
+  font-family:var(--font);
+  padding:5px 12px 5px 8px;
+  border-radius:20px;
+  cursor:pointer;
+  transition:all 0.15s;
+  box-shadow:0 1px 2px rgba(0,0,0,0.06);
+}
+.nav-back:hover{
+  color:var(--blue);
+  border-color:var(--blue);
+  background:var(--blue-mid);
+  box-shadow:0 1px 4px rgba(31,111,255,0.15);
+}
+.top-nav{
+  height:72px;
+  padding:0 32px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}.logo img{height:60px;width:auto}
+.logo-fallback{font-family:var(--font-head);font-size:25px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+.logo-fallback span{color:var(--blue)}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:14px 28px;
+  border-radius:12px;
+  font-family:var(--font);
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+  transition:all 0.15s;
+  line-height:1;
+}
+.btn-primary{
+  background:linear-gradient(135deg,#3b82f6,#2563eb);
+}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#1558e0}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:10px 18px;font-size:13px}/* ── Hero / Landing ── */
+.hero{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:72px 32px 56px;
+  text-align:center;
+  max-width:980px;
+  margin:0 auto;
+  width:100%;
+}.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-mid);border:1px solid rgba(31,111,255,0.2);color:var(--blue);font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;margin-bottom:20px;letter-spacing:0.04em}
+.hero h1{font-family:var(--font-head);font-size:58px;font-weight:700;line-height:1.08;letter-spacing:-1.5px;margin-bottom:18px;color:var(--text)}.hero h1 span{color:var(--blue)}
+.hero p{
+  font-size:18px;
+  color:var(--text2);
+  max-width:620px;
+  margin-top: 10px;
+  margin-bottom:40px;
+  font-weight:400;
+  line-height:1.75;
+}
+.hero{
+  padding:80px 32px 60px;
+}
+/* ── Role cards ── */
+.role-row{
+  display:flex;
+  gap:22px;
+  margin-bottom:38px;
+  justify-content:center;
+  width:100%;
+}
+.role-card{
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:14px;
+  padding:26px 24px;
+  width:240px;
+  min-height:148px;
+  cursor:pointer;
+  transition:all 0.22s ease;
+  text-align:left;
+}
+.role-card:hover{
+  border-color:rgba(31,111,255,0.4);
+  box-shadow:0 8px 20px rgba(31,111,255,0.08);
+  transform:translateY(-2px);
+}.role-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.role-icon{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  background:var(--blue-mid);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:14px;
+}
+.role-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:6px}
+.role-desc{font-size:14px;color:var(--text3);line-height:1.5}
+/* ── Auth ── */
+.auth-wrap{
+  flex:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:72px 32px 40px;
+}
+.auth-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:44px;
+  width:100%;
+  max-width:560px;
+  box-shadow:0 8px 24px rgba(15,17,23,0.04);
+}.auth-card h2{font-family:var(--font-head);font-size:25px;font-weight:700;margin-bottom:6px}
+.auth-card p{font-size:13px;color:var(--text3);margin-bottom:22px}
+.role-pill{display:inline-flex;align-items:center;gap:6px;background:var(--blue-mid);color:var(--blue);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:14px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:7px;letter-spacing:0.03em}
+.inp{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 15px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color 0.15s}
+.inp:focus{border-color:var(--blue);background:#fff}
+.inp::placeholder{color:var(--text3)}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.auth-foot{text-align:center;margin-top:16px;font-size:12px;color:var(--text3)}
+.auth-foot a{color:var(--blue);cursor:pointer;font-weight:500}
+.password-wrap{position:relative}
+.password-wrap .inp{padding-right:60px}
+.password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:11px;color:var(--blue);cursor:pointer;font-weight:500;font-family:var(--font)}
+.auth-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+
+
+/* ── Upload ── */
+.upload-center{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:48px 32px;
+  max-width:760px;
+  margin:0 auto;
+  width:100%;
+}.upload-zone{width:100%;border:2px dashed var(--border2);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;background:var(--surface)}
+.upload-zone:hover {
+  border-color: #1f6fff;
+  background: #f8fbff;
+}.upload-zone h3{font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:5px}
+.upload-zone p{font-size:12px;color:var(--text3)}
+.divider{width:100%;text-align:center;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin:20px 0 12px;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:calc(50% - 60px);height:1px;background:var(--border)}
+.divider::before{left:0}.divider::after{right:0}
+.recent-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.15s;width:100%}
+.recent-item:hover{border-color:var(--blue)}
+.recent-icon{width:32px;height:32px;border-radius:7px;background:var(--blue-mid);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.recent-name{font-size:13px;font-weight:500}
+.recent-meta{font-size:11px;color:var(--text3)}
+.file-name {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #1f6fff;
+  font-weight: 600;
+}
+
+.file-name::before {
+  content: "✔ ";
+}
+
+.hidden {
+  display: none;
+}
+.file-selected {
+  border: 2px solid #2563eb;
+  background-color: #eff6ff;
+}.upload-zone {
+  transition: all 0.2s ease;
+}
+
+/* When dragging */
+.upload-zone.drag-over {
+  border: 2px dashed #1f6fff;
+  background: #eff6ff;
+}
+
+.upload-zone.file-selected {
+  border: 2px solid #1f6fff;
+  background: #eef4ff;
+  box-shadow: 0 0 0 3px rgba(31,111,255,0.15);
+}
+
+.upload-zone.file-selected h3 {
+  color: #1f6fff;
+}
+
+.upload-zone.file-selected p {
+  font-weight: 600;
+}
+
+/* File name */
+.file-name {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #1f6fff;
+}
+/* ── Progress screen ── */
+.progress-center{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:48px 32px;
+  max-width:860px;
+  margin:0 auto;
+  width:100%;
+  text-align:center;
+}.progress-center h2{font-family:var(--font-head);font-size:28px;font-weight:700;margin-bottom:8px}
+.progress-center>p{font-size:13px;color:var(--text3);margin-bottom:28px}
+
+/* Ocean wave card */
+.ocean-card{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px}
+.ocean-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px 0}
+.ocean-label{font-size:12px;font-weight:500;color:var(--text2)}
+.ocean-pct{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--blue)}
+#ocean-canvas{display:block;width:100%;height:140px}
+.ocean-bar-track{height:4px;background:var(--bg);margin:0 18px 14px}
+@keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.ocean-bar-fill{height:100%;background:var(--blue);border-radius:2px;transition:width 0.5s ease;width:0%}
+
+/* Spinner animation */
+.spinner-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Stages */
+.stages{width:100%;display:flex;flex-direction:column;gap:6px}
+.stage-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;transition:all 0.25s}
+.stage-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3);transition:all 0.25s}
+.stage-dot.active{border-color:var(--blue);background:var(--blue-mid);animation:pulse 1.4s ease infinite}
+.stage-dot.done{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,255,0.3)}50%{box-shadow:0 0 0 5px rgba(31,111,255,0)}}
+.stage-name{font-size:13px;font-weight:500;flex:1;text-align:left;color:var(--text2)}
+.stage-name.active{color:var(--blue)}
+.stage-name.done{color:var(--text2)}
+.stage-status{font-size:11px;color:var(--text3)}
+.stage-status.active{color:var(--blue)}
+.stage-status.done{color:var(--green)}
+
+/* ── Results ── */
+.results-shell{flex:1;display:flex;overflow:hidden}
+.sidebar{
+  width:220px;
+  min-width:220px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  padding:16px 0;
+  overflow-y:auto;
+  transition:width 0.2s ease, min-width 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
+}
+.sidebar.collapsed{
+  width:0;
+  min-width:0;
+  opacity:0;
+  overflow:hidden;
+  padding:0;
+}
+.sidebar-toggle{
+  position:fixed;
+  bottom:24px;
+  left:24px;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  transition:all 0.15s;
+  color:var(--text2);
+}
+.sidebar-toggle:hover{
+  border-color:var(--blue);
+  color:var(--blue);
+}.sb-section{margin-bottom:6px;padding:0 8px}
+.sb-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:8px 8px 4px}
+.sb-item{padding:8px 10px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.12s}
+.sb-item:hover{background:var(--bg);color:var(--text)}
+.sb-item.active{background:var(--blue-light);color:var(--blue)}
+.sb-ver{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:7px;font-size:12px;color:var(--text2);cursor:pointer;transition:background 0.12s}
+.sb-ver:hover{background:var(--bg)}
+.sb-ver.active{color:var(--blue);background:var(--blue-light)}
+.vdot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.vdot.active{background:var(--blue)}
+
+.results-main{flex:1;overflow-y:auto;padding:32px 36px}
+.results-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.results-head h2{font-family:var(--font-head);font-size:25px;font-weight:700}
+.results-meta{font-size:12px;color:var(--text3);margin-top:3px}
+.verdict{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(217,119,6,0.2);font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;white-space:nowrap}
+
+/* Metrics */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:5px}
+.metric-val{font-family:var(--font-head);font-size:30px;font-weight:700;line-height:1}
+.metric-val.blue{color:var(--blue)}.metric-val.red{color:var(--red)}.metric-val.amber{color:var(--amber)}.metric-val.green{color:var(--green)}
+.metric-sub{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* Two col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding:12px 16px;border-bottom:1px solid var(--border)}
+.flag-row{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid var(--border)}
+.flag-row:last-child{border-bottom:none}
+.sev{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.sev.high{background:var(--red-bg);color:var(--red)}
+.sev.medium{background:var(--amber-bg);color:var(--amber)}
+.sev.low{background:var(--blue-light);color:var(--blue)}
+.flag-q{font-size:12px;line-height:1.45}
+.flag-id{font-size:10px;color:var(--text3);margin-top:2px}
+.summary-text{padding:14px 16px;font-size:12px;color:var(--text2);line-height:1.6}
+
+/* Chat */
+.chat-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+.chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.chat-head-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)}
+.chat-badge{font-size:10px;padding:2px 9px;border-radius:3px;background:var(--blue-mid);color:var(--blue);font-weight:500}
+.chat-msgs{max-height:260px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.msg{display:flex;flex-direction:column;gap:3px}
+.msg-who{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.04em}
+.msg-who.you{color:var(--blue)}
+.msg-bubble{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;line-height:1.5;color:var(--text2);max-width:90%}
+.msg-bubble.you{background:var(--blue-mid);border-color:rgba(31,111,255,0.15);color:var(--text)}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg)}
+.chat-input-row .inp{flex:1}
+.chat-send{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.15s}
+.chat-send:hover{background:#1558e0}
+.chat-typing{display:none;font-size:11px;color:var(--text3);padding:4px 14px;font-style:italic}
+.chat-typing.visible{display:block}
+
+/* Reports */
+.report-section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px}
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.rep-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.rep-name{font-family:var(--font-head);font-size:17px;font-weight:700;margin-bottom:5px}
+.rep-desc{font-size:11px;color:var(--text3);margin-bottom:14px}
+.rep-actions{display:flex;gap:8px}
+.rep-btn{font-family:var(--font);font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;font-weight:500;transition:all 0.15s}
+.rep-btn.primary{background:var(--blue);color:#fff;border:none}
+.rep-btn.primary:hover{background:#1558e0}
+.rep-btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.rep-btn.ghost:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Avatar */
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;font-family:var(--font-head);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:999;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;padding:28px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.modal h3{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--text3);margin-bottom:20px}
+.modal-close{position:absolute;right:16px;top:12px;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* Preview modal */
+.preview-content{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:12px;line-height:1.8;color:var(--text2);white-space:pre-wrap;max-height:400px;overflow-y:auto;font-family:'Courier New',monospace}
+
+.nav-user{display:flex;align-items:center;gap:10px}
+.nav-user span{font-size:13px;color:var(--text2);font-weight:500}
+
+/* Responsive */
+@media(max-width:1100px){.metrics-row{grid-template-columns:repeat(2,1fr)}.two-col,.rep-grid{grid-template-columns:1fr}}
+@media(max-width:860px){
+  .results-shell{flex-direction:column}
+  .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border)}
+  .role-row{flex-direction:column;align-items:center}
+  .form-grid2{grid-template-columns:1fr}
+  .hero h1{font-size:40px}
+  .role-card{width:100%;max-width:340px}
+}
+@media(max-width:640px){.top-nav{padding:14px 18px}.results-main{padding:18px}.metrics-row{grid-template-columns:1fr}.results-head{flex-direction:column;align-items:flex-start}}
+/* Benchmark strip */
+.benchmark-strip{background:var(--blue-mid);border:1px solid rgba(31,111,255,0.2);border-radius:6px;padding:7px 14px;font-size:12px;color:var(--blue);margin-bottom:14px;display:none}
+ 
+/* Scorecard */
+.scorecard{display:grid;grid-template-columns:auto 1fr auto;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;align-items:center}
+.score-circle{display:flex;flex-direction:column;align-items:center;justify-content:center;width:90px;height:90px;border-radius:50%;border:3px solid var(--border2);flex-shrink:0}
+.score-number{font-family:var(--font-head);font-size:32px;font-weight:800;line-height:1}
+.score-number.green{color:var(--green)}.score-number.amber{color:var(--amber)}.score-number.red{color:var(--red)}
+.radar-wrap{width:180px;height:180px;flex-shrink:0}
+.narrative-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1}
+.narrative-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px}
+.narrative-card-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px}
+.narrative-item{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:12px}
+.ni-sev{font-size:9px;padding:1px 5px;border-radius:2px;font-weight:600;white-space:nowrap;margin-top:1px;flex-shrink:0}
+.ni-sev.high{background:var(--red-bg);color:var(--red)}.ni-sev.medium{background:var(--amber-bg);color:var(--amber)}.ni-sev.low{background:var(--blue-light);color:var(--blue)}
+.ni-check{color:var(--green);font-weight:700;flex-shrink:0}
+.ni-label{color:var(--text2);line-height:1.4}
+.narrative-empty{font-size:12px;color:var(--text3)}
+.biggest-risk-card{background:var(--red-bg);border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:12px}
+.biggest-risk-card .narrative-card-title{color:var(--red)}
+#biggest-risk-text{font-size:12px;color:var(--text);font-weight:500;line-height:1.5}
+.verdict.green{background:var(--green-bg);color:var(--green);border-color:rgba(5,150,105,0.2)}
+.verdict.amber{background:var(--amber-bg);color:var(--amber);border-color:rgba(217,119,6,0.2)}
+.verdict.red{background:var(--red-bg);color:var(--red);border-color:rgba(220,38,38,0.2)}
+.tab-content-panel{display:none;margin-bottom:16px}
+.finding-row{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid var(--border)}
+.finding-row:last-child{border-bottom:none}
+.finding-id{font-family:monospace;font-size:10px;color:var(--text3);min-width:52px;margin-top:2px}
+.finding-content{flex:1}
+.finding-label{font-size:12px;color:var(--text);line-height:1.45}
+.finding-evidence{font-size:11px;color:var(--text3);margin-top:3px;font-style:italic}
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px}
+.ov-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px}
+.ov-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:10px;padding:2px 8px;border-radius:3px;background:var(--surface);border:1px solid var(--border2);color:var(--text3)}
+.chat-attach-btn{width:38px;height:38px;border-radius:8px;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.chat-attach-btn:hover{border-color:var(--blue)}
+.chat-attach-btn svg{width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:1.5}
+ 
+ 
+</style>
+</head>
+<body>
+
+<!-- ═══ LANDING ═══ -->
+<section class="screen active" id="s-landing">
+  <nav class="top-nav">
+    <div class="logo" onclick="goHome()" style="cursor:pointer">
+      <img src="logo.png" alt="UpScale" onerror="this.style.display='none';document.getElementById('logo-fb-1').style.display='block'"/>
+      <div class="logo-fallback" id="logo-fb-1" style="display:none">UP<span>SCALE</span></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="go('s-login')">Sign in</button>
+  </nav>
+  <div class="hero">
+    <div class="hero-badge">AI-powered pitch deck due diligence</div>
+    <h1>Analyse any deck.<br><span>In minutes.</span></h1>
+    <p>Deep due diligence reports and IC memos generated automatically — powered by 44 proprietary checks.</p>
+    <div class="role-row">
+      <div class="role-card" id="rc-investor" onclick="selectRole('investor')">
+        <div class="role-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f6fff" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="role-title">Investor</div>
+        <div class="role-desc">Evaluate incoming decks</div>
+      </div>
+          <div class="role-card" id="rc-company" onclick="selectRole('startup')">       
+          <div class="role-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f6fff" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        </div>
+        <div class="role-title">StartUp</div>
+        <div class="role-desc">Strengthen your own deck</div>
+      </div>
+    </div>
+    <button class="btn btn-blue" id="continue-btn" style="opacity:0.3;pointer-events:none" onclick="go('s-signup')">Continue →</button>
+    <p style="font-size:13px;color:var(--text3);margin-top:16px">Already have an account? <a style="color:var(--blue);cursor:pointer" onclick="go('s-login')">Sign in</a></p>
+  </div>
+</section>
+
+<!-- ═══ SIGNUP ═══ -->
+<section class="screen" id="s-signup">
+  <nav class="top-nav">
+    <div class="nav-left">
+      <button class="nav-back" onclick="go('s-landing')">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+  Back
+</button>
+      <div class="logo" onclick="goHome()" style="cursor:pointer">
+        <img src="logo.png" alt="UpScale" onerror="this.style.display='none';document.getElementById('logo-fb-2').style.display='block'"/>
+        <div class="logo-fallback" id="logo-fb-2" style="display:none">UP<span>SCALE</span></div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="go('s-login')">Sign in instead</button>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="role-pill">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1f6fff" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span id="pill-role">Investor</span>
+      </div>
+      <h2>Create your account</h2>
+      <p>Get started with AI-powered due diligence</p>
+      <div class="form-grid2" style="margin-bottom:14px">
+        <div class="field"><label>First name</label><input class="inp" id="signup-first-name"/></div>
+        <div class="field"><label>Last name</label><input class="inp" id="signup-last-name"/></div>
+      </div>
+      <div class="field"><label>Email address</label><input class="inp" id="signup-email" placeholder="you@startupscale360.com"/></div>
+      <div class="field"><label>Company</label><input class="inp" id="signup-company" placeholder="StartupScale360"/></div>
+      <div class="field" style="margin-bottom:20px">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input class="inp" id="signup-password" type="password" placeholder="••••••••"/>
+          <button type="button" class="password-toggle" onclick="togglePassword('signup-password',this)">Show</button>
+        </div>
+      </div>
+      <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="handleRegister()">Create account →</button>
+      <div class="auth-foot">Already have an account? <a onclick="go('s-login')">Sign in</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LOGIN ═══ -->
+<section class="screen" id="s-login">
+    <nav class="top-nav">
+      <div class="nav-left">
+        <button class="nav-back" onclick="go('s-landing')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back
+        </button>
+      </div>
+      <div class="logo" onclick="goHome()" style="cursor:pointer">
+      <img src="logo.png" alt="UpScale" onerror="this.style.display='none';document.getElementById('logo-fb-3').style.display='block'"/>
+      <div class="logo-fallback" id="logo-fb-3" style="display:none">UP<span>SCALE</span></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="go('s-signup')">Create account</button>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2>Welcome back</h2>
+      <p>Sign in to continue your analysis</p>
+      <div class="field"><label>Email address</label><input class="inp" id="login-email" placeholder="you@startupscale360.com"/></div>
+      <div class="field" style="margin-bottom:20px">
+      <label>Password</label>
+        <div class="password-wrap">
+          <input class="inp" id="login-password" type="password" placeholder="••••••••"/>
+          <button type="button" class="password-toggle" onclick="togglePassword('login-password',this)">Show</button>
+        </div>
+      </div>
+      <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="handleLogin()">Sign in →</button>
+      <div class="auth-foot">No account yet? <a onclick="go('s-signup')">Create one</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ UPLOAD ═══ -->
+<section class="screen" id="s-upload">
+  <nav class="top-nav">
+    <button class="nav-back" onclick="go('s-landing')">← Back</button>
+<div class="logo" onclick="goHome()" style="cursor:pointer">    
+    <img src="logo.png" alt="UpScale" onerror="this.style.display='none';document.getElementById('logo-fb-4').style.display='block'"/>
+      <div class="logo-fallback" id="logo-fb-4" style="display:none">UP<span>SCALE</span></div>
+    </div>
+    <div class="nav-user">
+      <span id="nav-company-name">StartupScale360</span>
+      <div class="avatar" id="nav-avatar-upload">SK</div>
+    </div>
+  </nav>
+  <div class="upload-center">
+    <div style="width:100%;margin-bottom:24px">
+      <div style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--text);">Hello, <span id="welcome-name">there</span> 👋</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px">Upload a pitch deck to begin your analysis</div>
+    </div>
+    <div class="field" style="width:100%;margin-bottom:10px">
+      <label>Startup name</label>
+      <input class="inp" id="startup-name" placeholder="e.g. Startup Name"/>
+    </div>
+    <input type="file" id="deck-file" accept=".pdf,.pptx,.docx" style="display:none" onchange="handleFileChosen(event)"/>
+    <div id="upload-zone" class="upload-zone" onclick="document.getElementById('deck-file').click()">
+        <svg style="width:40px;height:40px;margin:0 auto 12px;display:block" viewBox="0 0 48 48" fill="none" stroke="#1f6fff" stroke-width="1.5">
+        <path d="M24 32V16M17 23l7-7 7 7"/><rect x="8" y="8" width="32" height="32" rx="4"/>
+      </svg>
+      <h3>Drop your PDF or PPTX here</h3>
+      <p id="upload-text">or click to browse · Max 50 MB</p>
+      <p id="file-name" class="file-name hidden"></p>
+    </div>
+    <div style="display:flex;justify-content:center;width:100%;margin-bottom:20px">
+      <button class="btn btn-blue" id="run-analysis-btn" style="opacity:0.4;pointer-events:none" onclick="runSelectedAnalysis()">Run Analysis →</button>
+    </div>
+    <div class="divider">recent analyses</div>
+    <div class="recent-item" id="recent-analysis-item" style="display:none" onclick="openLatestAnalysis()">
+      <div class="recent-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1f6fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+      </div>
+      <div style="flex:1">
+        <div class="recent-name" id="recent-analysis-name">Latest analysis</div>
+        <div class="recent-meta" id="recent-analysis-meta"></div>
+      </div>
+      <span style="font-size:11px;color:var(--blue);font-weight:700">View →</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROGRESS ═══ -->
+<section class="screen" id="s-progress">
+  <nav class="top-nav">
+    <button class="nav-back" onclick="go('s-landing')">← Back</button>
+<div class="logo" onclick="goHome()" style="cursor:pointer">      <img src="logo.png" alt="UpScale" onerror="this.style.display='none';document.getElementById('logo-fb-5').style.display='block'"/>
+      <div class="logo-fallback" id="logo-fb-5" style="display:none">UP<span>SCALE</span></div>
+    </div>
+    <span id="progress-filename" style="font-size:12px;color:var(--text3)">Analysing...</span>
+  </nav>
+  <div class="progress-center">
+    <div class="spinner-wrap"><div class="spinner" id="main-spinner"></div></div>
+    <h2>Analysing your deck</h2>
+    <p id="progress-status-text">Starting pipeline...</p>
+    <div class="ocean-card">
+      <div class="ocean-header">
+        <span class="ocean-label" id="ocean-stage-label">Initialising</span>
+        <span class="ocean-pct" id="pct-display">0%</span>
+      </div>
+      <canvas id="ocean-canvas" height="80"></canvas>
+<div class="ocean-bar-track"><div class="ocean-bar-fill" id="ocean-bar"></div></div>
+<div id="discovery-feed" style="margin:8px 18px 0;min-height:36px;max-height:120px;overflow:hidden;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:2px"></div> 
+  </div>
+    <div class="stages" id="stages-container"></div>
+<button class="btn btn-blue" id="done-btn" style="margin-top:24px;display:none" onclick="loadAnalysis(activeAnalysisId)">View results →</button>  </div>
+</section>
+
+<!-- ═══ RESULTS ═══ -->
+<section class="screen" id="s-results">
+  <nav class="top-nav">
+<button class="nav-back" onclick="go('s-landing')">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+  Back
+</button>    <div class="logo" onclick="goHome()" style="cursor:pointer">
+      <img src="logo.png" alt="UpScale" onerror="this.style.display='none';document.getElementById('logo-fb-6').style.display='block'"/>
+      <div class="logo-fallback" id="logo-fb-6" style="display:none">UP<span>SCALE</span></div>
+    </div>
+    <div class="nav-user">
+      <button class="btn btn-ghost btn-sm" onclick="openEmailModal()">Email reports</button>
+      <div class="avatar" id="nav-avatar-results">SK</div>
+    </div>
+  </nav>
+  
+<div class="results-shell">
+  <button id="sb-reopen" onclick="toggleSidebar()" style="display:none;position:fixed;top:80px;left:12px;z-index:100;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);align-items:center;color:var(--text2)">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+</button>
+    <aside class="sidebar" id="main-sidebar">
+  <div style="display:flex;justify-content:flex-end;padding:0 10px 8px">
+    <button onclick="toggleSidebar()" id="sb-toggle" title="Collapse sidebar" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;display:flex;align-items:center;transition:all 0.15s">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="sb-toggle-icon"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+  </div>
+       <div class="sb-section">
+        <div class="sb-label">Views</div>
+        <div class="sb-item active" onclick="switchView('overview',this)">Overview</div>
+        <div class="sb-item" onclick="switchView('flags',this)">All flags</div>
+        <div class="sb-item" onclick="switchView('unclear',this)">Unclear</div>
+        <div class="sb-item" onclick="switchView('dd',this)">DD Report</div>
+        <div class="sb-item" onclick="switchView('ic',this)">IC Memo</div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Versions</div>
+        <div id="version-list">
+          <div class="sb-ver active"><span>v1 - current</span><div class="vdot active"></div></div>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="padding:8px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost" style="width:100%;font-size:12px;padding:10px;justify-content:center" onclick="go('s-upload')">+ New analysis</button>
+      </div>
+    </aside>
+    <div class="results-main">
+      <div class="results-head">
+        <div>
+          <h2 id="results-title">Analysis</h2>
+          <div class="results-meta" id="results-meta">-</div>
+        </div>
+        <div class="verdict amber" id="results-verdict">Reviewing...</div>
+      </div>
+      
+      <div id="view-overview" class="tab-content-panel" style="display:block">
+        <div class="benchmark-strip" id="benchmark-strip"></div>
+        <div class="scorecard">
+          <div class="score-circle">
+            <div class="score-number amber" id="score-number">-</div>
+            <div style="font-size:9px;color:var(--text3)">/100</div>
+          </div>
+          <div class="narrative-grid">
+            <div class="narrative-card">
+              <div class="narrative-card-title">Top risks</div>
+              <div id="top-risks-list"><div class="narrative-empty">Loading...</div></div>
+            </div>
+            <div class="narrative-card biggest-risk-card">
+              <div class="narrative-card-title">Biggest red flag</div>
+              <div id="biggest-risk-text">Loading...</div>
+            </div>
+          </div>
+          <div class="radar-wrap"><canvas id="radar-chart"></canvas></div>
+        </div>
+        <div class="metrics-row">
+          <div class="metric"><div class="metric-label">Total checks</div><div class="metric-val blue" id="m-total">-</div><div class="metric-sub" id="m-total-sub">-</div></div>
+          <div class="metric"><div class="metric-label">Flagged</div><div class="metric-val red" id="m-flagged">-</div><div class="metric-sub" id="m-flagged-sub">-</div></div>
+          <div class="metric"><div class="metric-label">High severity</div><div class="metric-val red" id="m-ic">-</div><div class="metric-sub">IC attention needed</div></div>
+          <div class="metric"><div class="metric-label">Unclear</div><div class="metric-val amber" id="m-unclear">-</div><div class="metric-sub">needs clarification</div></div>
+        </div>
+        <div class="panel"><div id="tab-overview-content"></div></div>
+      </div>
+      <div id="view-flags" class="tab-content-panel">
+        <div class="panel">
+          <div class="panel-title">All Flagged Items</div>
+          <div id="tab-flags-content"></div>
+        </div>
+      </div>
+      <div id="view-unclear" class="tab-content-panel">
+        <div class="panel">
+          <div class="panel-title">Unclear Items</div>
+          <div id="tab-unclear-content"></div>
+        </div>
+      </div>
+      <div id="view-dd" class="tab-content-panel">
+        <div class="panel">
+          <div class="panel-title">Due Diligence Report - Framework A</div>
+          <div id="tab-dd-content" style="max-height:500px;overflow-y:auto"></div>
+        </div>
+      </div>
+      <div id="view-ic" class="tab-content-panel">
+        <div class="panel">
+          <div class="panel-title">IC Memo - Framework B</div>
+          <div id="tab-ic-content" style="max-height:500px;overflow-y:auto"></div>
+        </div>
+      </div>
+      <div class="chat-panel">
+        <div class="chat-head">
+          <span class="chat-head-title">Add context - ask questions or update the analysis</span>
+          <span class="chat-badge" id="chat-ver-badge">v1 active</span>
+        </div>
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="chat-typing" id="chat-typing">AI is thinking...</div>
+        <div class="chat-input-row">
+            <button class="chat-attach-btn" onclick="openChatFileUpload()" title="Attach document">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </button>
+          <input type="file" id="chat-file-input" accept=".pdf,.pptx,.docx,.txt" style="display:none" onchange="handleChatFileSelected(this)"/>
+          <input class="inp" id="chat-inp" placeholder="Ask about the deck, or share new information..." onkeydown="chatKey(event)"/>
+          <button class="chat-send" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+      <div class="report-section-label">Download Reports</div>
+      <div class="rep-grid" id="rep-grid">
+        <div class="rep-card">
+          <div class="rep-name">Due Diligence Report</div>
+          <div class="rep-desc">Framework A generating...</div>
+          <div class="rep-actions"><button class="rep-btn ghost" disabled>Generating...</button></div>
+        </div>
+        <div class="rep-card">
+          <div class="rep-name">IC Memo</div>
+          <div class="rep-desc">Framework B generating...</div>
+          <div class="rep-actions"><button class="rep-btn ghost" disabled>Generating...</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MODALS ═══ -->
+<div class="modal-bg" id="email-modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeEmailModal()">×</button>
+    <h3>Email reports</h3>
+    <p>Both reports will be sent as .docx attachments</p>
+    <div class="field"><label>Recipient email</label><input class="inp" placeholder="partner@startupscale360.com"/></div>
+    <div class="field"><label>Note (optional)</label><textarea class="inp" rows="2" placeholder="e.g. Please review before Thursday's IC meeting"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn btn-blue btn-sm" onclick="closeEmailModal()">Send reports</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="preview-modal">
+  <div class="modal" style="position:relative;max-width:600px">
+    <button class="modal-close" onclick="closePreviewModal()">×</button>
+    <h3 id="preview-modal-title">Report Preview</h3>
+    <p id="preview-modal-sub">First 30 paragraphs</p>
+    <div class="preview-content" id="preview-modal-body">Loading...</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closePreviewModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+const API = "";
+let selectedRole   = "investor";
+let selectedFile   = null;
+let currentUser    = null;
+let currentAnalysisId = null;
+let currentAnalysis   = null;
+let latestHistory     = [];
+
+// ── Ocean wave animation ───────────────────────────────────────────────────────
+let waveOffset = 0;
+let waveTarget = 0;
+let waveAnimId = null;
+
+function startWaveAnimation() {
+  const canvas = document.getElementById("ocean-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight || 140;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  function drawFish(x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // tail
+    ctx.beginPath();
+    ctx.moveTo(-16, 0);
+    ctx.lineTo(-28, -9);
+    ctx.lineTo(-28, 9);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(31,111,255,0.85)";
+    ctx.fill();
+
+    // body
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 17, 10, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "#1f6fff";
+    ctx.fill();
+
+    // fin
+    ctx.beginPath();
+    ctx.moveTo(-2, -3);
+    ctx.lineTo(5, -13);
+    ctx.lineTo(9, -2);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(31,111,255,0.55)";
+    ctx.fill();
+
+    // eye
+    ctx.beginPath();
+    ctx.arc(8, -2, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(8.5, -2, 0.9, 0, Math.PI * 2);
+    ctx.fillStyle = "#0f1117";
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function draw() {
+    waveOffset += 0.03;
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // back wave
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let x = 0; x <= w; x++) {
+      const y = Math.sin((x / w) * 3 * Math.PI + waveOffset * 0.8 + 1) * 8 + h * 0.66;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(31,111,255,0.06)";
+    ctx.fill();
+
+    // front wave
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let x = 0; x <= w; x++) {
+      const y = Math.sin((x / w) * 4 * Math.PI + waveOffset) * 10
+              + Math.sin((x / w) * 2 * Math.PI + waveOffset * 1.3) * 5
+              + h * 0.56;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(31,111,255,0.12)";
+    ctx.fill();
+
+    // fish position follows progress
+    const fishX = 30 + (w - 60) * (waveTarget / 100);
+    const fishY = Math.sin((fishX / w) * 4 * Math.PI + waveOffset) * 8
+                + Math.sin((fishX / w) * 2 * Math.PI + waveOffset * 1.3) * 4
+                + h * 0.54;
+
+    // bubbles
+    for (let i = 0; i < 3; i++) {
+      const bx = fishX - 20 - i * 9;
+      const by = fishY - 10 - ((waveOffset * 16 + i * 7) % 22);
+      ctx.beginPath();
+      ctx.arc(bx, by, 2 + i * 0.5, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(31,111,255,${0.2 - i * 0.04})`;
+      ctx.stroke();
+    }
+
+    drawFish(fishX, fishY);
+
+    waveAnimId = requestAnimationFrame(draw);
+  }
+
+  if (waveAnimId) cancelAnimationFrame(waveAnimId);
+  draw();
+}
+
+function stopWaveAnimation() {
+  if (waveAnimId) { cancelAnimationFrame(waveAnimId); waveAnimId = null; }
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────────
+function go(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+  if (document.activeElement) document.activeElement.blur();
+
+  if (id === "s-upload") { loadCurrentUser(); loadHistory(); }
+  if (id === "s-progress") { startWaveAnimation(); }
+  if (id === "s-results")  { stopWaveAnimation(); }
+}
+
+// ── Role selection ─────────────────────────────────────────────────────────────
+function selectRole(r) {
+  selectedRole = r;
+  document.getElementById("rc-investor").classList.toggle("selected", r === "investor");
+  document.getElementById("rc-company").classList.toggle("selected", r === "startup");
+  const btn = document.getElementById("continue-btn");
+  btn.style.opacity = "1"; btn.style.pointerEvents = "auto";
+  document.getElementById("pill-role").textContent = r === "investor" ? "Investor" : "Startup";
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function escapeHtml(s) {
+  return String(s || "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function capitalize(s) { s=String(s||""); return s?s[0].toUpperCase()+s.slice(1):s; }
+
+async function apiFetch(url, opts={}) {
+  const res = await fetch(`${API}${url}`, {
+    credentials:"include", ...opts,
+    headers: { ...(opts.headers||{}) }
+  });
+  let data = null;
+  try { data = await res.json(); } catch(_){}
+  if (!res.ok) throw new Error((data&&data.error)||`Request failed: ${res.status}`);
+  return data;
+}
+
+function setAvatars(initials, company) {
+  document.querySelectorAll(".avatar").forEach(el => el.textContent = initials);
+  document.querySelectorAll(".nav-user span").forEach(el => el.textContent = company);
+}
+
+// ── Auth ───────────────────────────────────────────────────────────────────────
+async function handleRegister() {
+  try {
+    const first   = document.getElementById("signup-first-name").value.trim();
+    const last    = document.getElementById("signup-last-name").value.trim();
+    const email   = document.getElementById("signup-email").value.trim();
+    const company = document.getElementById("signup-company").value.trim();
+    const pass    = document.getElementById("signup-password").value.trim();
+
+    if (!first||!last||!email||!company||!pass) { alert("Please fill all fields."); return; }
+
+    await apiFetch("/api/register", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ full_name:`${first} ${last}`, email, company, role:selectedRole||"investor", password:pass })
+    });
+    await loadCurrentUser();
+    go("s-upload");
+  } catch(e) { alert(e.message); }
+}
+
+async function handleLogin() {
+  try {
+    const email = document.getElementById("login-email").value.trim();
+    const pass  = document.getElementById("login-password").value.trim();
+    if (!email||!pass) { alert("Please enter email and password."); return; }
+
+    await apiFetch("/api/login", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ email, password:pass })
+    });
+    await loadCurrentUser();
+    go("s-upload");
+  } catch(e) { alert(e.message); }
+}
+
+async function loadCurrentUser() {
+  try {
+    const user = await apiFetch("/api/me");
+    currentUser = user;
+    const initials = (user.full_name||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+    setAvatars(initials, user.company||"");
+    const wn = document.getElementById("welcome-name");
+    if (wn) wn.textContent = (user.full_name||"").split(" ")[0];
+  } catch(_) { currentUser = null; }
+}
+
+function togglePassword(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  inp.type = inp.type==="password" ? "text" : "password";
+  btn.textContent = inp.type==="password" ? "Show" : "Hide";
+}
+
+// ── File upload ────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+
+  const fileInput = document.getElementById("deck-file");   // ✅ FIXED ID
+  const fileNameEl = document.getElementById("file-name");
+  const dropZone = document.querySelector(".upload-zone"); // ✅ FIXED ID
+  const runBtn = document.getElementById("run-analysis-btn");
+
+  // Prevent browser opening file
+  ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+    document.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  });
+
+  // File input change
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      selectedFile = file;
+
+      fileNameEl.textContent = "✓ " + file.name;
+      fileNameEl.classList.remove("hidden");
+
+      dropZone.classList.add("file-selected");
+
+      runBtn.style.opacity = "1";
+      runBtn.style.pointerEvents = "auto";
+    }
+  });
+
+  // Drag UI
+  dropZone.addEventListener("dragover", (e) => {
+    dropZone.classList.add("drag-over");
+    e.dataTransfer.dropEffect = "copy";
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("drag-over");
+  });
+
+  // Drop handler
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("drag-over");
+
+  const files = e.dataTransfer.files;
+  if (!files.length) return;
+
+  selectedFile = files[0];
+
+  // show file name
+  fileNameEl.textContent = "Selected: " + selectedFile.name;
+  fileNameEl.classList.remove("hidden");
+
+  // highlight box
+  dropZone.classList.add("file-selected");
+
+  // enable button
+  const btn = document.getElementById("run-analysis-btn");
+  btn.style.opacity = "1";
+  btn.style.pointerEvents = "auto";
+});
+});
+function handleFileChosen(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  selectedFile = file;
+
+  const fileNameEl = document.getElementById("file-name");
+  const dropZone = document.querySelector(".upload-zone");
+
+  if (fileNameEl) {
+    fileNameEl.textContent = "✓ " + file.name;
+    fileNameEl.classList.remove("hidden");
+  }
+
+  if (dropZone) {
+    dropZone.classList.add("file-selected");
+  }
+
+  const btn = document.getElementById("run-analysis-btn");
+  if (btn) {
+    btn.style.opacity = "1";
+    btn.style.pointerEvents = "auto";
+  }
+}
+// ── Run Analysis (FIXED) ─────────────────────────────────────────────────────
+async function runSelectedAnalysis() {
+  try {
+    if (!selectedFile) {
+      alert("Please select a file first.");
+      return;
+    }
+
+    const startupName = document.getElementById("startup-name")?.value.trim() || "";
+
+    const fd = new FormData();
+    fd.append("file", selectedFile);
+    fd.append("startup_name", startupName);
+    fd.append("provider", "");
+    fd.append("use_llm", "true");
+    fd.append("use_pii", "false");
+
+    // ✅ Use your existing API helper (keeps consistency)
+    const res = await fetch(`${API}/api/run`, {
+      method: "POST",
+      body: fd,
+      credentials: "include"
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+
+    currentAnalysisId = data.analysis_id;
+
+    // Set filename in progress screen
+    const fname = document.getElementById("progress-filename");
+    if (fname) fname.textContent = selectedFile.name;
+
+    // Navigate + start progress
+    go("s-progress");
+    initProgressUI();
+    connectProgressStream(currentAnalysisId);
+
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+
+// ── Progress UI ────────────────────────────────────────────────────────────────
+let progressES = null;
+
+const stagesDef = [
+  { name:"Ingesting deck" },
+  { name:"Cleaning & classifying sections" },
+  { name:"Running anomaly checks" },
+  { name:"Generating reports" },
+  { name:"Complete" },
+];
+
+function initProgressUI() {
+  document.getElementById("done-btn").style.display = "none";
+  document.getElementById("pct-display").textContent = "0%";
+  document.getElementById("ocean-bar").style.width = "0%";
+  document.getElementById("progress-status-text").textContent = "Starting pipeline...";
+  document.getElementById("ocean-stage-label").textContent = "Initialising";
+  document.getElementById("main-spinner").style.display = "block";
+  buildStagesList();
+}
+
+function buildStagesList() {
+  const c = document.getElementById("stages-container");
+  c.innerHTML = stagesDef.map((s,i) => `
+    <div class="stage-row" id="sr-${i+1}">
+      <div class="stage-dot" id="sd-${i+1}"></div>
+      <div class="stage-name" id="sn-${i+1}">${s.name}</div>
+      <div class="stage-status" id="ss-${i+1}">Waiting</div>
+    </div>
+  `).join("");
+}
+function showDiscovery(text) {
+  var feed = document.getElementById("discovery-feed");
+  if (!feed) return;
+  var item = document.createElement("div");
+  item.style.cssText = [
+    "display:inline-flex",
+    "align-items:center",
+    "gap:6px",
+    "background:#eef4ff",
+    "border:1px solid #c7d9ff",
+    "border-radius:20px",
+    "padding:4px 12px",
+    "font-size:11px",
+    "color:#1f6fff",
+    "font-weight:500",
+    "margin:3px 4px",
+    "animation:fadeIn 0.3s ease",
+    "white-space:nowrap"
+  ].join(";");
+  item.textContent = text;
+  feed.insertBefore(item, feed.firstChild);
+  while (feed.children.length > 8) feed.removeChild(feed.lastChild);
+}
+
+function updateProgressUI(step, label, pct, done) {
+  waveTarget = pct;
+  document.getElementById("pct-display").textContent = `${pct}%`;
+  document.getElementById("ocean-bar").style.width = `${pct}%`;
+  document.getElementById("ocean-stage-label").textContent = label || "Running...";
+  document.getElementById("progress-status-text").textContent = label || "Processing...";
+
+  for (let i=1; i<=stagesDef.length; i++) {
+    const dot = document.getElementById(`sd-${i}`);
+    const nm  = document.getElementById(`sn-${i}`);
+    const st  = document.getElementById(`ss-${i}`);
+    if (!dot) continue;
+
+    if (i < step) {
+      dot.className="stage-dot done"; dot.textContent="✓";
+      nm.className="stage-name done";
+      st.className="stage-status done"; st.textContent="Done";
+    } else if (i === step) {
+      dot.className="stage-dot active"; dot.textContent="";
+      nm.className="stage-name active";
+      st.className="stage-status active"; st.textContent=label||"Running...";
+    } else {
+      dot.className="stage-dot"; dot.textContent=i;
+      nm.className="stage-name";
+      st.className="stage-status"; st.textContent="Waiting";
+    }
+  }
+
+  if (done) {
+    document.getElementById("main-spinner").style.display = "none";
+    document.getElementById("done-btn").style.display = "inline-flex";
+  }
+}
+
+function connectProgressStream(aid) {
+  activeAnalysisId = aid;
+  if (progressES) progressES.close();
+  progressES = new EventSource(`/api/progress/${aid}`, { withCredentials:true });
+
+  // Fallback poll — if SSE drops or done event never arrives
+  const fallbackPoll = setInterval(async () => {
+    try {
+      const r = await fetch(`/api/analysis/${aid}`, {credentials:'include'});
+      const d = await r.json();
+      if (d.status === 'complete' || d.status === 'failed') {
+        clearInterval(fallbackPoll);
+        if (progressES) progressES.close();
+        await loadAnalysis(aid);
+      }
+    } catch(e) {}
+  }, 20000);
+
+progressES.onmessage = async function(e) {
+    const d = JSON.parse(e.data);
+    updateProgressUI(d.step, d.label, d.pct, d.done);
+    if (d.discovery) showDiscovery(d.discovery);
+
+    if (d.done) {
+      clearInterval(fallbackPoll);
+      progressES.close();
+      await loadAnalysis(aid);
+    }
+  };
+
+  progressES.onerror = function() {
+    if (progressES) progressES.close();
+    // SSE dropped — wait 3s then check if analysis is done
+    setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/analysis/${aid}`, {credentials:'include'});
+        const d = await r.json();
+        if (d.status === 'complete' || d.status === 'failed') {
+          clearInterval(fallbackPoll);
+          await loadAnalysis(aid);
+        }
+      } catch(e) {}
+    }, 3000);
+  };
+ }
+
+// ── Load & render analysis ─────────────────────────────────────────────────────
+async function loadAnalysis(aid, version=null, retry=0) {
+  try {
+    let url = `/api/analysis/${aid}`;
+    if (version) url += `?version=${version}`;
+    const data = await apiFetch(url);
+
+    if (data.status==="running" && retry<15) {
+      setTimeout(()=>loadAnalysis(aid,version,retry+1), 700); return;
+    }
+
+    currentAnalysisId = aid;
+    currentAnalysis   = data;
+    renderResults(data);
+  } catch(e) {
+    if (retry<10) setTimeout(()=>loadAnalysis(aid,version,retry+1),700);
+    else alert(e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// results_additions.js
+// Paste this entire file into your index.html <script> block
+// REPLACE these 4 old functions if they exist:
+//   renderResults, renderVersions, sendChat, switchView
+// ADD everything else at the end of your script block
+// ═══════════════════════════════════════════════════════
+
+let radarChart = null;
+var activeAnalysisId = null;
+var currentUserRole="investor"; // default role
+function renderResults(data) {
+  go("s-results");
+
+  currentUserRole = data.user_role || "investor";
+
+  document.getElementById("results-title").textContent = data.startup_name || data.filename || "Analysis";
+  document.getElementById("results-meta").textContent = (data.slide_count || 0) + " slides · " + (data.created_at || "").slice(0, 10);
+
+ renderScorecard(data);
+renderTabOverview(data);
+renderTabFlags(data.findings || []);
+renderTabUnclear(data.findings || []);
+renderTabDDReport(data.reports || []);
+renderTabICMemo(data.reports || []);
+renderReports(data.reports || []);
+if (data.version) renderVersions(data.version);
+
+  document.getElementById("m-total").textContent    = data.total_checks || 0;
+  document.getElementById("m-total-sub").textContent = (data.slide_count || 0) + " slides analysed";
+  document.getElementById("m-flagged").textContent   = data.flagged_count || 0;
+  document.getElementById("m-flagged-sub").textContent = "of " + (data.total_checks || 0) + " checks";
+  document.getElementById("m-ic").textContent        = data.ic_memo_risks || 0;
+  document.getElementById("m-unclear").textContent   = data.unclear_count || 0;
+
+  var verdict = document.getElementById("results-verdict");
+  if (verdict) {
+    var verdictText = data.score_verdict || "Reviewing...";
+    if (currentUserRole === "startup") {
+      var verdictMap = {
+        "Proceed to Full Diligence": "Strong Investor-Readiness",
+        "Conditional Proceed": "Good Progress — Some Gaps to Close",
+        "Pass — Conditions Apply": "Needs Work Before Pitching",
+        "Not Investment Ready": "Significant Work Needed"
+      };
+      verdictText = verdictMap[verdictText] || verdictText;
+    }
+    verdict.textContent = verdictText;
+    verdict.className = "verdict " + (data.score_color || "amber");
+  }
+
+  var bench = document.getElementById("benchmark-strip");
+  if (bench && data.percentile !== undefined) {
+    bench.textContent = "This deck scored higher than " + data.percentile + "% of decks reviewed on this platform";
+    bench.style.display = "block";
+  }
+}
+function renderScorecard(data) {
+  var score    = data.deal_score || 0;
+  var radar    = data.radar || {};
+  var topRisks = data.top_risks || [];
+  var bigRisk  = data.biggest_risk;
+
+  var scoreEl = document.getElementById("score-number");
+  if (scoreEl) {
+    scoreEl.textContent = score;
+    scoreEl.className = "score-number " + (data.score_color || "amber");
+  }
+
+  var canvas = document.getElementById("radar-chart");
+  if (canvas && Object.keys(radar).length) {
+    if (radarChart) radarChart.destroy();
+    radarChart = new Chart(canvas.getContext("2d"), {
+      type: "radar",
+      data: {
+        labels: Object.keys(radar),
+        datasets: [{
+          data: Object.values(radar),
+          backgroundColor: "rgba(31,111,255,0.15)",
+          borderColor: "rgba(31,111,255,0.8)",
+          borderWidth: 2,
+          pointBackgroundColor: "#1f6fff",
+          pointRadius: 3
+        }]
+      },
+      options: {
+        scales: {
+          r: {
+            min: 0, max: 10,
+            ticks: { stepSize: 2, font: { size: 9 } },
+            pointLabels: { font: { size: 10, weight: "500" } },
+            grid: { color: "rgba(0,0,0,0.06)" }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  var risksEl = document.getElementById("top-risks-list");
+  if (risksEl) {
+    risksEl.innerHTML = topRisks.length
+      ? topRisks.map(function(r) {
+          return '<div class="narrative-item"><span class="ni-sev ' + (r.severity || "").toLowerCase() + '">' + r.severity + '</span><span class="ni-label">' + escapeHtml(r.label) + "</span></div>";
+        }).join("")
+      : '<div class="narrative-empty">No significant risks flagged</div>';
+  }
+
+  var bigEl = document.getElementById("biggest-risk-text");
+  if (bigEl) {
+    bigEl.textContent = bigRisk ? bigRisk.label : "No critical risks identified";
+  }
+}
+
+function renderTabOverview(data) {
+  var el = document.getElementById("tab-overview-content");
+  if (!el) return;
+
+  var riskLabel = currentUserRole === "startup" ? "Biggest area to improve" : "Biggest single risk";
+  var scores = data.section_scores || {};
+  var benchmarks = data.section_benchmarks || {};
+
+  // Build section score cards
+  var scoreCards = Object.keys(scores).map(function(cat) {
+    var s = scores[cat];
+    var avg = benchmarks[cat];
+    var bar = Math.round(s.score * 10);
+    var avgBar = avg ? Math.round(avg * 10) : null;
+    var colorMap = {green: "#27ae60", amber: "#e87c1e", red: "#c0392b"};
+    var col = colorMap[s.color] || "#1f6fff";
+
+    var benchmarkHtml = avg
+      ? '<div style="font-size:10px;color:#888;margin-top:2px">Platform avg: ' + avg + '/10</div>'
+      : '';
+
+    return '<div style="margin-bottom:12px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+      '<span style="font-size:12px;font-weight:600;color:#333">' + cat + '</span>' +
+      '<span style="font-size:13px;font-weight:700;color:' + col + '">' + s.score + '/10</span>' +
+      '</div>' +
+      '<div style="height:6px;background:#eee;border-radius:3px;overflow:hidden">' +
+      '<div style="height:100%;width:' + bar + '%;background:' + col + ';border-radius:3px;transition:width 0.6s ease"></div>' +
+      '</div>' +
+      benchmarkHtml +
+      '</div>';
+  }).join("");
+
+  el.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px">' +
+
+    // Section scores panel
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:14px">Section Scores</div>' +
+    (scoreCards || '<div style="color:#aaa;font-size:12px">No scores available</div>') +
+    '</div>' +
+
+    // Sections detected + biggest risk panel
+    '<div style="display:flex;flex-direction:column;gap:12px">' +
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:10px">Sections Detected</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+    (data.sections || []).map(function(s) {
+      return '<span class="chip">' + s + '</span>';
+    }).join("") +
+    '</div></div>' +
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:8px">' + riskLabel + '</div>' +
+    '<div style="font-size:13px;color:var(--text);line-height:1.5">' +
+    (data.biggest_risk ? escapeHtml(data.biggest_risk.label) : "None identified") +
+    '</div></div>' +
+    '</div>' +
+
+    '</div>';
+}
+function renderTabFlags(findings) {
+  var el = document.getElementById("tab-flags-content");
+  if (!el) return;
+  var flagged = findings.filter(function(f) { return f.status === "FLAGGED"; });
+  if (!flagged.length) {
+    el.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--text3);text-align:center">No flagged items</div>';
+    return;
+  }
+  el.innerHTML = flagged.map(function(f) {
+    var sevLabel = currentUserRole === "startup" ? "NEEDS WORK" : f.severity;
+    return '<div class="finding-row">' +
+      '<span class="finding-id">' + escapeHtml(f.check_id) + "</span>" +
+      '<span class="sev ' + (f.severity || "").toLowerCase() + '">' + sevLabel + "</span>" +
+      '<div class="finding-content">' +
+      '<div class="finding-label">' + escapeHtml(f.label) + "</div>" +
+      (f.evidence && f.evidence !== "NOT_FOUND" ? '<div class="finding-evidence">' + escapeHtml(f.evidence) + "</div>" : "") +
+      (currentUserRole === "startup" && f.suggestion ? '<div style="margin-top:6px;padding:8px 10px;background:#eef6ff;border-left:3px solid #1f6fff;border-radius:4px;font-size:12px;color:#1a3a6b;line-height:1.5">💡 ' + escapeHtml(f.suggestion) + "</div>" : "") +
+      "</div></div>";
+  }).join("");
+}
+
+function renderTabUnclear(findings) {
+  var el = document.getElementById("tab-unclear-content");
+  if (!el) return;
+  var unclear = findings.filter(function(f) { return f.status === "UNCLEAR"; });
+  if (!unclear.length) {
+    el.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--text3);text-align:center">No unclear items</div>';
+    return;
+  }
+  el.innerHTML = unclear.map(function(f) {
+    var sevLabel = currentUserRole === "startup" ? "NEEDS CLARIFICATION" : "UNCLEAR";
+    return '<div class="finding-row">' +
+      '<span class="finding-id">' + escapeHtml(f.check_id) + "</span>" +
+      '<span class="sev medium">' + sevLabel + "</span>" +
+      '<div class="finding-content">' +
+      '<div class="finding-label">' + escapeHtml(f.label) + "</div>" +
+      (f.evidence ? '<div class="finding-evidence">' + escapeHtml(f.evidence) + "</div>" : "") +
+      (currentUserRole === "startup" && f.suggestion ? '<div style="margin-top:6px;padding:8px 10px;background:#eef6ff;border-left:3px solid #1f6fff;border-radius:4px;font-size:12px;color:#1a3a6b;line-height:1.5">💡 ' + escapeHtml(f.suggestion) + "</div>" : "") +
+      "</div></div>";
+  }).join("");
+}
+
+function renderTabDDReport(reports) {
+  var el = document.getElementById("tab-dd-content");
+  if (!el) return;
+  var rep = reports.find(function(r) { return r.report_type === "framework_a"; });
+  if (!rep) {
+    el.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--text3)">Report not yet generated</div>';
+    return;
+  }
+  var repId = rep.id;
+  el.innerHTML = '<div style="padding:16px;display:flex;gap:10px;border-bottom:1px solid var(--border);background:var(--bg)">' +
+    '<button class="btn btn-blue btn-sm" onclick="downloadReport(' + repId + ')">Download .docx</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="loadReportPreview(' + repId + ',\'framework_a\')">Load preview</button>' +
+    '</div><div id="dd-preview-body" style="padding:20px;font-size:12px;color:var(--text2);line-height:1.8">Click Load preview to read the report here.</div>';
+}
+
+function renderTabICMemo(reports) {
+  var el = document.getElementById("tab-ic-content");
+  if (!el) return;
+  var rep = reports.find(function(r) { return r.report_type === "framework_b"; });
+  if (!rep) {
+    el.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--text3)">Report not yet generated</div>';
+    return;
+  }
+  var repId = rep.id;
+  el.innerHTML = '<div style="padding:16px;display:flex;gap:10px;border-bottom:1px solid var(--border);background:var(--bg)">' +
+    '<button class="btn btn-blue btn-sm" onclick="downloadReport(' + repId + ')">Download .docx</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="loadReportPreview(' + repId + ',\'framework_b\')">Load preview</button>' +
+    '</div><div id="ic-preview-body" style="padding:20px;font-size:12px;color:var(--text2);line-height:1.8">Click Load preview to read the memo here.</div>';
+}
+
+async function loadReportPreview(reportId, type) {
+  var bodyId = type === "framework_a" ? "dd-preview-body" : "ic-preview-body";
+  var el = document.getElementById(bodyId);
+  if (!el) return;
+  el.textContent = "Loading...";
+  try {
+    var data = await apiFetch("/api/reports/" + reportId + "/preview");
+    var lines = (data.preview_text || "").split("\n\n");
+    el.innerHTML = lines.map(function(line) {
+      if (line.startsWith("## ")) {
+        return '<h3 style="font-family:var(--font-head);font-size:14px;font-weight:700;margin:16px 0 6px;color:var(--text)">' + escapeHtml(line.slice(3)) + "</h3>";
+      }
+      return '<p style="margin-bottom:10px">' + escapeHtml(line) + "</p>";
+    }).join("");
+  } catch(e) {
+    el.textContent = "Error: " + e.message;
+  }
+}
+
+function switchView(view, el) {
+  document.querySelectorAll(".sb-item").forEach(function(i) { 
+    i.classList.remove("active"); 
+  });
+  el.classList.add("active");
+
+  document.querySelectorAll(".tab-content-panel").forEach(function(p) { 
+    p.style.display = "none";
+    p.style.opacity = "1";
+  });
+
+  var panel = document.getElementById("view-" + view);
+  if (panel) {
+    panel.style.display = "block";
+    var main = panel.closest(".results-main") || panel.parentElement;
+    if (main) main.scrollTop = 0;
+  }
+}
+
+function renderVersions(vCount) {
+  var vl = document.getElementById("version-list");
+  if (!vl) return;
+  var html = "";
+  for (var v = vCount; v >= 1; v--) {
+    var isActive = v === vCount;
+    var label = isActive ? " - current" : "";
+    html += '<div class="sb-ver ' + (isActive ? "active" : "") + '" onclick="loadAnalysis(\'' + currentAnalysisId + "'," + v + ')">' +
+      "<span>v" + v + label + "</span>" +
+      '<div class="vdot ' + (isActive ? "active" : "") + '"></div>' +
+      "</div>";
+  }
+  vl.innerHTML = html;
+}
+
+function openChatFileUpload() {
+  document.getElementById("chat-file-input").click();
+}
+
+function handleChatFileSelected(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var inp = document.getElementById("chat-inp");
+  inp.placeholder = file.name + " attached - add a message or just click Send";
+}
+
+
+async function sendChat() {
+  var inp     = document.getElementById("chat-inp");
+  var txt     = inp.value.trim();
+  var fileInp = document.getElementById("chat-file-input");
+  var file    = fileInp && fileInp.files[0];
+
+  if (!txt && !file) return;
+  if (!currentAnalysisId) return;
+
+  var displayMsg = txt || (file ? "Uploaded: " + file.name : "");
+  inp.value = "";
+  inp.placeholder = "Ask about the deck, or share new information...";
+  if (fileInp) fileInp.value = "";
+  var preview = document.getElementById("chat-file-preview");
+  if (preview) preview.style.display = "none";
+
+  if (!currentAnalysis.iterations) currentAnalysis.iterations = [];
+  currentAnalysis.iterations.push({ role: "user", version: currentAnalysis.version || 1, message: displayMsg });
+  renderChat(currentAnalysis.iterations);
+
+  var typing = document.getElementById("chat-typing");
+  if (typing) typing.classList.add("visible");
+
+  try {
+    var data;
+    if (file) {
+      var fd = new FormData();
+      if (txt) fd.append("message", txt);
+      fd.append("file", file);
+      var res = await fetch("/api/analysis/" + currentAnalysisId + "/iterate", {
+        method: "POST", credentials: "include", body: fd
+      });
+      data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+    } else {
+      data = await apiFetch("/api/analysis/" + currentAnalysisId + "/iterate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: txt })
+      });
+    }
+
+    if (typing) typing.classList.remove("visible");
+
+    currentAnalysis.iterations.push({ role: "assistant", version: data.version, message: data.reply });
+    currentAnalysis.version = data.version;
+    renderChat(currentAnalysis.iterations);
+    renderVersions(data.version);
+    document.getElementById("chat-ver-badge").textContent = "v" + data.version + " active";
+
+  } catch(e) {
+    if (typing) typing.classList.remove("visible");
+    alert(e.message);
+  }
+}
+// ── Missing helper functions ───────────────────────────────────────────────────
+
+function renderFindings(findings) {
+  const flagged = findings.filter(f => f.status === "FLAGGED");
+  const panel = document.getElementById("flagged-panel");
+  if (!panel) return;
+  const rows = flagged.length
+    ? flagged.slice(0,6).map(f => `
+        <div class="flag-row">
+          <span class="sev ${(f.severity||"").toLowerCase()}">${f.severity}</span>
+          <div><div class="flag-q">${escapeHtml(f.label)}</div>
+          <div class="flag-id">${escapeHtml(f.check_id)} · ${escapeHtml(f.category)}</div></div>
+        </div>`).join("")
+    : `<div class="summary-text">No flagged items found.</div>`;
+  panel.innerHTML = `<div class="panel-title">Flagged items</div>${rows}`;
+  const icText = document.getElementById("ic-summary-text");
+  if (icText) {
+    const high = findings.filter(f => f.status==="FLAGGED" && f.severity==="HIGH");
+    icText.innerHTML = high.length
+      ? high.slice(0,3).map(f => `<strong>${escapeHtml(f.check_id)}:</strong> ${escapeHtml(f.label)}`).join("<br><br>")
+      : "No high-severity items flagged.";
+  }
+}
+
+function renderChat(iterations) {
+  const msgs = document.getElementById("chat-msgs");
+  if (!msgs) return;
+
+  function parseBold(text) {
+    return text
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n- /g, "\n• ")
+      .replace(/\n/g, "<br>");
+  }
+
+  if (!iterations.length) {
+    msgs.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px">
+        <div style="width:28px;height:28px;border-radius:50%;background:#1f6fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0;font-weight:700">AI</div>
+        <div style="background:#f0f4ff;border:1px solid #dde8ff;border-radius:0 12px 12px 12px;padding:10px 14px;font-size:13px;color:#1a1a1a;line-height:1.6;max-width:85%">
+          Analysis complete. Ask me anything about this deck or provide additional context.
+        </div>
+      </div>`;
+    return;
+  }
+
+  msgs.innerHTML = iterations.map(i => {
+    const isUser    = i.role === "user";
+    const isSystem  = i.role === "system";
+    const isAI      = i.role === "assistant";
+
+    if (isSystem) {
+      return `
+        <div style="display:flex;justify-content:center;margin-bottom:12px">
+          <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:8px 14px;font-size:11px;color:#888;text-align:center;max-width:90%">
+            ${parseBold(i.message || "")}
+          </div>
+        </div>`;
+    }
+
+    if (isUser) {
+      return `
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <div style="max-width:75%">
+            <div style="text-align:right;font-size:10px;color:#aaa;margin-bottom:3px">You · v${i.version}</div>
+            <div style="background:#1f6fff;color:#fff;border-radius:12px 0 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6">
+              ${parseBold(i.message || "")}
+              ${i.attachment ? `<div style="margin-top:6px;font-size:11px;opacity:0.8">📎 ${escapeHtml(i.attachment)}</div>` : ""}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    if (isAI) {
+      return `
+        <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#1f6fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0;font-weight:700">AI</div>
+          <div style="max-width:85%">
+            <div style="font-size:10px;color:#aaa;margin-bottom:3px">AI · v${i.version}</div>
+            <div style="background:#f0f4ff;border:1px solid #dde8ff;border-radius:0 12px 12px 12px;padding:10px 14px;font-size:13px;color:#1a1a1a;line-height:1.6">
+              ${parseBold(i.message || "")}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    return "";
+  }).join("");
+
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function renderReports(reports) {
+  const grid = document.getElementById("rep-grid");
+  if (!grid) return;
+  const a = reports.find(r => r.report_type === "framework_a");
+  const b = reports.find(r => r.report_type === "framework_b");
+  const cardHTML = (title, desc, rep) => {
+    if (!rep) return `<div class="rep-card"><div class="rep-name">${title}</div><div class="rep-desc">${desc} · generating...</div><div class="rep-actions"><button class="rep-btn ghost" disabled>Generating...</button></div></div>`;
+    return `<div class="rep-card"><div class="rep-name">${title}</div><div class="rep-desc">${desc} · v${rep.version}</div><div class="rep-actions">
+      <button class="rep-btn primary" onclick="downloadReport(` + rep.id + `)">Download .docx</button>
+      <button class="rep-btn ghost" onclick="previewReport(` + rep.id + `,'${escapeHtml(title)}')">Preview</button>
+    </div></div>`;
+  };
+  grid.innerHTML = cardHTML("Due Diligence Report","Framework A",a) + cardHTML("IC Memo","Framework B",b);
+}
+
+function downloadReport(id) { window.open(`/api/reports/${id}/download`, "_blank"); }
+
+async function previewReport(id, title) {
+  document.getElementById("preview-modal-title").textContent = title || "Report Preview";
+  document.getElementById("preview-modal-body").textContent = "Loading...";
+  document.getElementById("preview-modal").classList.add("open");
+  try {
+    const data = await apiFetch(`/api/reports/${id}/preview`);
+    document.getElementById("preview-modal-body").textContent = data.preview_text || "No content.";
+  } catch(e) {
+    document.getElementById("preview-modal-body").textContent = `Error: ${e.message}`;
+  }
+}
+
+function closePreviewModal() { document.getElementById("preview-modal").classList.remove("open"); }
+function openEmailModal() { document.getElementById("email-modal").classList.add("open"); }
+function closeEmailModal() { document.getElementById("email-modal").classList.remove("open"); }
+function chatKey(e) { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }
+function goHome() { go("s-landing"); }
+function goBack() { window.history.back(); }
+function toggleSidebar() {
+  var sb = document.getElementById("main-sidebar");
+  sb.classList.toggle("collapsed");
+  var isCollapsed = sb.classList.contains("collapsed");
+  
+  var reopenBtn = document.getElementById("sb-reopen");
+  if (reopenBtn) reopenBtn.style.display = isCollapsed ? "flex" : "none";
+}
+
+async function loadHistory() {
+  try {
+    const rows = await apiFetch("/api/history");
+    latestHistory = rows || [];
+    const item = document.getElementById("recent-analysis-item");
+    const nameEl = document.getElementById("recent-analysis-name");
+    const metaEl = document.getElementById("recent-analysis-meta");
+    if (!latestHistory.length) { if(item) item.style.display="none"; return; }
+    const latest = latestHistory[0];
+    if (item) item.style.display="flex";
+    if (nameEl) nameEl.textContent = latest.startup_name || latest.filename || latest.id;
+    if (metaEl) metaEl.textContent = `${(latest.created_at||"").slice(0,10)} · ${latest.flagged_count||0} flags · v${latest.version||1}`;
+  } catch(e) { console.error(e); }
+}
+
+function openLatestAnalysis() {
+  if (!latestHistory.length) return;
+  loadAnalysis(latestHistory[0].id);
+}
+
+window.addEventListener("load", async () => { await loadCurrentUser(); });
+
+</script>
+
+</body>
+</html>

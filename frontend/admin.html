@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StartupScale360 — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1f6fff;--blue-light:#e8f0ff;--blue-mid:rgba(31,111,255,0.1);
+  --text:#0f1117;--text2:#4b5263;--text3:#9198a8;
+  --bg:#f5f6f8;--surface:#fff;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.13);
+  --red:#dc2626;--red-bg:#fef2f2;--amber:#d97706;--amber-bg:#fffbeb;
+  --green:#059669;--green-bg:#ecfdf5;
+  --font:'Inter',system-ui,sans-serif;
+--font-head:'Libre Baskerville',serif;
+}
+body{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* Login */
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;width:100%;max-width:380px}
+.auth-card h2{font-family:var(--font-head);font-size:22px;font-weight:700;margin-bottom:4px}
+.auth-card p{font-size:13px;color:var(--text3);margin-bottom:22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:5px}
+.inp{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-family:var(--font);font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s}
+.inp:focus{border-color:var(--blue);background:#fff}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s}
+.btn-blue{background:var(--blue);color:#fff;width:100%;justify-content:center}
+.btn-blue:hover{background:#1558e0}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.admin-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(220,38,38,0.1);color:var(--red);border:1px solid rgba(220,38,38,0.2);font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:14px;font-weight:500}
+
+/* Nav */
+.top-nav{height:56px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text)}
+.logo span{color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:12px}
+
+/* Dashboard */
+.dash-body{flex:1;padding:28px;max-width:1200px;width:100%;margin:0 auto}
+.section-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:16px}
+.section-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px}
+.stat-val{font-family:var(--font-head);font-size:28px;font-weight:700;line-height:1}
+.stat-val.blue{color:var(--blue)}.stat-val.red{color:var(--red)}.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}
+.stat-meta{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* Charts row */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.chart-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:14px}
+
+/* Tables */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.table-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-head-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:8px 16px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg)}
+.data-table td{padding:10px 16px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg)}
+.pill{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:500}
+.pill.investor{background:var(--blue-mid);color:var(--blue)}
+.pill.company{background:var(--green-bg);color:var(--green)}
+.pill.complete{background:var(--green-bg);color:var(--green)}
+.pill.running{background:var(--amber-bg);color:var(--amber)}
+.pill.failed{background:var(--red-bg);color:var(--red)}
+
+/* Tabs */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.tab-btn{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font)}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Audit log */
+.audit-row{display:flex;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;align-items:flex-start}
+.audit-time{color:var(--text3);font-size:11px;white-space:nowrap;min-width:130px}
+.audit-user{color:var(--blue);font-weight:500;min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.audit-action{font-weight:500;min-width:130px}
+.audit-detail{color:var(--text3);flex:1}
+
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="s-login">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="admin-badge">🔐 Admin Access</div>
+      <h2>StartupScale360</h2>
+      <p>Admin portal — enter your admin password to continue</p>
+      <div class="field">
+        <label>Admin Password</label>
+        <input class="inp" type="password" id="admin-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="btn btn-blue" onclick="doLogin()">Access Admin Portal →</button>
+      <p style="font-size:12px;color:var(--text3);margin-top:14px;text-align:center">
+        <a href="/" style="color:var(--blue)">← Back to main app</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="s-dash">
+  <nav class="top-nav">
+    <div class="logo">STARTUP<span>SCALE360</span> <span style="font-size:11px;color:var(--red);margin-left:8px;font-family:var(--font);font-weight:500">ADMIN</span></div>
+    <div class="nav-right">
+      <button class="btn btn-ghost btn-sm" onclick="exportData()">Export Excel</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.location='/'">← App</button>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <div class="section-title" id="dash-greeting">Admin Dashboard</div>
+    <p class="section-sub">Real-time overview of the DD Intelligence Platform</p>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-val blue" id="st-users">—</div><div class="stat-meta">registered accounts</div></div>
+      <div class="stat-card"><div class="stat-label">Total Analyses</div><div class="stat-val blue" id="st-analyses">—</div><div class="stat-meta" id="st-analyses-sub">—</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Deal Score</div><div class="stat-val amber" id="st-score">—</div><div class="stat-meta">out of 100</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Flags / Deck</div><div class="stat-val red" id="st-flags">—</div><div class="stat-meta">per analysis</div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Analyses per day (last 14 days)</div>
+        <canvas id="chart-daily" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Most common red flags</div>
+        <canvas id="chart-flags" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('users',this)">Users</button>
+      <button class="tab-btn" onclick="switchTab('analyses',this)">Analyses</button>
+      <button class="tab-btn" onclick="switchTab('audit',this)">Audit Log</button>
+    </div>
+
+    <!-- Users tab -->
+    <div class="tab-panel active" id="tab-users">
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-head-title">Registered Users</span>
+          <span id="users-count" style="font-size:11px;color:var(--text3)"></span>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Analyses tab -->
+    <div class="tab-panel" id="tab-analyses">
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-head-title">All Analyses</span>
+          <span id="analyses-count" style="font-size:11px;color:var(--text3)"></span>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Startup</th><th>Run by</th><th>Company</th><th>Slides</th><th>Flagged</th><th>Score</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="analyses-tbody"><tr><td colspan="8" style="padding:20px;text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Audit tab -->
+    <div class="tab-panel" id="tab-audit">
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-head-title">Audit Log</span>
+          <span style="font-size:11px;color:var(--text3)">Last 200 actions</span>
+        </div>
+        <div id="audit-body" style="max-height:500px;overflow-y:auto">
+          <div style="padding:20px;text-align:center;color:var(--text3)">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+async function apiFetch(url, opts={}) {
+  const res = await fetch(url, { credentials:"include", ...opts, headers:{...(opts.headers||{})} });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(data.error||`${res.status}`);
+  return data;
+}
+
+async function doLogin() {
+  const pw = document.getElementById("admin-password").value;
+  try {
+    await apiFetch("/api/admin/login", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({password:pw})
+    });
+    document.getElementById("s-login").classList.remove("active");
+    document.getElementById("s-dash").classList.add("active");
+    loadAll();
+  } catch(e) {
+    alert("Invalid password");
+  }
+}
+
+async function loadAll() {
+  await Promise.all([loadStats(), loadUsers(), loadAnalyses(), loadAudit()]);
+}
+
+async function loadStats() {
+  try {
+    const d = await apiFetch("/api/admin/stats");
+    document.getElementById("st-users").textContent     = d.total_users;
+    document.getElementById("st-analyses").textContent  = d.total_analyses;
+    document.getElementById("st-analyses-sub").textContent = `${d.complete} complete · ${d.failed} failed`;
+    document.getElementById("st-score").textContent     = d.avg_score;
+    document.getElementById("st-flags").textContent     = d.avg_flags;
+
+    // Daily chart
+    const dailyCtx = document.getElementById("chart-daily").getContext("2d");
+    new Chart(dailyCtx, {
+      type:"bar",
+      data:{
+        labels: d.daily_analyses.map(r=>r.day.slice(5)),
+        datasets:[{
+          label:"Analyses",
+          data: d.daily_analyses.map(r=>r.count),
+          backgroundColor:"rgba(31,111,255,0.7)",
+          borderRadius:4,
+        }]
+      },
+      options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}
+    });
+
+    // Flags chart
+    const flagsCtx = document.getElementById("chart-flags").getContext("2d");
+    new Chart(flagsCtx, {
+      type:"bar",
+      data:{
+        labels: d.top_flags.map(r=>r.check_id),
+        datasets:[{
+          label:"Frequency",
+          data: d.top_flags.map(r=>r.freq),
+          backgroundColor:"rgba(220,38,38,0.7)",
+          borderRadius:4,
+        }]
+      },
+      options:{
+        indexAxis:"y",
+        plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}
+      }
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function loadUsers() {
+  try {
+    const rows = await apiFetch("/api/admin/users");
+    document.getElementById("users-count").textContent = `${rows.length} users`;
+    document.getElementById("users-tbody").innerHTML = rows.map(u=>`
+      <tr>
+        <td><strong>${esc(u.full_name)}</strong></td>
+        <td>${esc(u.email)}</td>
+        <td>${esc(u.company)}</td>
+        <td><span class="pill ${u.role}">${u.role}</span></td>
+        <td>${(u.created_at||"").slice(0,10)}</td>
+      </tr>
+    `).join("") || "<tr><td colspan='5' style='padding:16px;color:var(--text3);text-align:center'>No users yet</td></tr>";
+  } catch(e) { console.error(e); }
+}
+
+async function loadAnalyses() {
+  try {
+    const rows = await apiFetch("/api/admin/analyses");
+    document.getElementById("analyses-count").textContent = `${rows.length} analyses`;
+    document.getElementById("analyses-tbody").innerHTML = rows.map(r=>`
+      <tr>
+        <td><strong>${esc(r.startup_name||r.filename)}</strong></td>
+        <td>${esc(r.full_name||r.user_email)}</td>
+        <td>${esc(r.company||"—")}</td>
+        <td>${r.slide_count||0}</td>
+        <td style="color:var(--red);font-weight:500">${r.flagged_count||0}</td>
+        <td>${scoreChip(r.deal_score||0)}</td>
+        <td><span class="pill ${r.status}">${r.status}</span></td>
+        <td>${(r.created_at||"").slice(0,10)}</td>
+      </tr>
+    `).join("") || "<tr><td colspan='8' style='padding:16px;color:var(--text3);text-align:center'>No analyses yet</td></tr>";
+  } catch(e) { console.error(e); }
+}
+
+async function loadAudit() {
+  try {
+    const rows = await apiFetch("/api/admin/audit");
+    document.getElementById("audit-body").innerHTML = rows.map(r=>`
+      <div class="audit-row">
+        <div class="audit-time">${(r.created_at||"").slice(0,19).replace("T"," ")}</div>
+        <div class="audit-user">${esc(r.user_email)}</div>
+        <div class="audit-action">${esc(r.action)}</div>
+        <div class="audit-detail">${esc(r.detail)}</div>
+      </div>
+    `).join("") || "<div style='padding:20px;text-align:center;color:var(--text3)'>No actions logged yet</div>";
+  } catch(e) { console.error(e); }
+}
+
+function scoreChip(score) {
+  const color = score>=75?"var(--green)":score>=50?"var(--amber)":"var(--red)";
+  return `<span style="font-weight:600;color:${color}">${score}/100</span>`;
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById(`tab-${name}`).classList.add("active");
+}
+
+function exportData() { window.open("/api/admin/export","_blank"); }
+
+function esc(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+</script>
+</body>
+</html>

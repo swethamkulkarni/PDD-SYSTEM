@@ -46,11 +46,11 @@ from report_1.section_writer import (
     all_findings_summary,
 )
 
-
 def _write(writer: SectionWriter, doc: Document, section_key: str,
            slide_texts: list, unknown_texts: list,
            findings_summary: str = "", framework: str = "A",
-           max_tokens: int = 700, slide_tables: list = None) -> None:
+           max_tokens: int = 700, slide_tables: list = None,
+           on_complete=None) -> None:
     """Generate LLM prose and write it using the mixed (bullet-aware) renderer."""
     text = writer.write_section(
         section_key, slide_texts, unknown_texts,
@@ -58,6 +58,8 @@ def _write(writer: SectionWriter, doc: Document, section_key: str,
         slide_tables=slide_tables,
     )
     add_mixed_section(doc, text)
+    if on_complete:
+        on_complete(section_key)
 
 
 def _gap(doc: Document, message: str) -> None:
@@ -75,7 +77,7 @@ def _write_questions(writer: SectionWriter, doc: Document, section_key: str,
     )
     add_questions_list(doc, text)
 
-def build_framework_a(result, provider: str = None) -> Document:
+def build_framework_a(result, provider: str = None, on_section_complete=None) -> Document:
     """
     Build the 11-section Due Diligence Report and return a python-docx Document.
 
@@ -154,7 +156,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=prod_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "ms", "product"),
-           max_tokens=700)
+           max_tokens=700, on_complete=on_section_complete)
     if not prod_slides:
         _gap(doc, "No dedicated product or problem slides identified — review UNKNOWN slides.")
 
@@ -165,7 +167,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=tech_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "tech", "ip", "product"),
-           max_tokens=700)
+           max_tokens=700, on_complete=on_section_complete)
     if not tech_slides:
         _gap(doc, "Technical architecture, AI/ML specifics, and IP position not described in deck.")
 
@@ -177,7 +179,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=biz_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "financ", "revenue", "business", "pricing"),
-           max_tokens=700)
+           max_tokens=700, on_complete=on_section_complete)
     if not biz_slides:
         _gap(doc, "Revenue streams, pricing model, and unit economics not explicitly presented.")
 
@@ -190,14 +192,14 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=arch_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "tech", "ip", "product"),
-           max_tokens=700)
+           max_tokens=700, on_complete=on_section_complete)
 
     add_heading(doc, "4.2 IP & Defensibility", level=2)
     _write(writer, doc, "comments_technology",
            slide_texts=_slides("technology", "solution", "ip"),
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "ip", "competi", "tech"),
-           max_tokens=500)
+           max_tokens=500, on_complete=on_section_complete)
     if not arch_slides:
         _gap(doc, "Scalability, AI/ML detail, and IP defensibility not addressed in the deck.")
 
@@ -208,7 +210,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=team_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "team", "ms", "founder"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not team_slides:
         _gap(doc, "No dedicated team slide identified — team composition and background unclear.")
 
@@ -221,7 +223,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "cap", "fund", "financ", "valuat"),
            slide_tables=_tables("cap_table", "funding", "financials"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not cap_slides:
         _gap(doc, "Cap table, ownership structure, and valuation not presented in the deck — material gap.")
 
@@ -235,14 +237,14 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=tract_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "traction", "metric", "revenue", "customer"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
 
     add_heading(doc, "7.2 Customer & Revenue Growth", level=2)
     _write(writer, doc, "business_model",
            slide_texts=_slides("financials", "traction", "customers", "revenue"),
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "revenue", "customer", "growth"),
-           max_tokens=500)
+           max_tokens=500, on_complete=on_section_complete)
     if not tract_slides:
         _gap(doc, "No concrete traction metrics (ARR, MRR, customers) presented — significant gap for DD.")
 
@@ -256,7 +258,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=mkt_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "market", "tam"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
 
     add_heading(doc, "8.2 Competitive Landscape", level=2)
     comp_slides = _slides("market", "competition", "competitive", "landscape",
@@ -265,7 +267,7 @@ def build_framework_a(result, provider: str = None) -> Document:
            slide_texts=comp_slides or unknowns[:3],
            unknown_texts=unknowns,
            findings_summary=findings_summary_for(result, "competi", "ms", "market"),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
     if not comp_slides:
         _gap(doc, "No competitive analysis slide identified — differentiation claims unverified.")
 
@@ -275,7 +277,7 @@ def build_framework_a(result, provider: str = None) -> Document:
                                "team", "investment", "thesis"),
            unknown_texts=unknowns,
            findings_summary=all_findings_summary(result),
-           max_tokens=600)
+           max_tokens=600, on_complete=on_section_complete)
 
 #edit: expanded section 9 to cover multiple key risk areas (technology, financials, regulations, GTM, competition) with dedicated LLM-generated narratives for each, in addition to the overall "Areas to Watch" section. Each sub-section pulls from relevant slide texts and findings to provide a focused analysis of risks and concerns in that area.
 # ── 9. Areas to Watch ───────────────────────────────────────────────────
@@ -285,7 +287,7 @@ def build_framework_a(result, provider: str = None) -> Document:
                                "risk", "solution", "technology"),
            unknown_texts=unknowns,
            findings_summary=all_findings_summary(result),
-           max_tokens=700)
+           max_tokens=700, on_complete=on_section_complete)
     
     # ADDED: 24/05: Render flagged findings as cards
     if flagged or unclear:
